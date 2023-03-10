@@ -9,6 +9,8 @@ $ErrorActionPreference = 'Stop'
 $debugBinPath = Join-Path $PSScriptRoot '/bin/Debug/net7.0'
 if (Test-Path "$PSScriptRoot/bin/Debug/net7.0") {
 	Add-Type -Path $debugBinPath/*.dll
+} else {
+	Add-Type -Path $PSScriptRoot/*.dll
 }
 
 #These are the cheapest models for testing
@@ -125,14 +127,13 @@ function Get-AIChat {
 	param(
 		#Include one or more prompts to start the conversation
 		[Parameter(Mandatory)]
-		[string[]]$Prompt,
+		[OpenAI.ChatCompletionRequestMessage[]]$Prompt,
 
 		#Supply a previous chat session to add new responses to it
 		[OpenAI.CreateChatCompletionRequest]$ChatSession,
 
 		#Save the chat session to this variable, so you can add more responses to it later
 		[string]$SessionVariable,
-
 
 		#The name of the model to use.
 		[ValidateSet([AvailableModels])]
@@ -162,17 +163,17 @@ function Get-AIChat {
 
 	foreach ($PromptItem in $Prompt) {
 		$ChatSession.Messages.Add(
-			[ChatCompletionRequestMessage]@{
-				Content = $PromptItem
-				#BUG: This is case sensitive in the API but NSWag generates it as uppercase
-				Role    = 'user'
-			}
+			$PromptItem
 		)
 	}
 
 	$chatResponse = $Client.CreateChatCompletion($ChatSession)
 
+	$price = Get-UsagePrice -Model $chatResponse.Model -Total $chatResponse.Usage.Total_tokens
+	Write-Verbose "Chat usage - $($chatResponse.Usage) [Cost: $price] for Id $($chatResponse.Id)"
+
 	if ($SessionVariable) {
+		$ChatSession.Messages.Add($chatResponse.Choices.Message)
 		#TODO: Implement Session Variable
 		throw [System.NotImplementedException]('NOT IMPLEMENTED: Needs to find which messages are new and add them to the session variable.')
 	}
@@ -221,8 +222,6 @@ filter ConvertFrom-ListResponse {
 	if ($PSItem.Object -ne 'list') { return }
 	return $PSItem.Data
 }
-
-
 
 #endregion Private
 
@@ -321,103 +320,89 @@ function Update-GitHubCopilotToken {
 	return $response.token
 }
 
-# function Get-Chat {
-# 	[CmdletBinding()]
-# 	param(
-# 		#Provide a chat prompt to initiate the conversation
-# 		[string[]]$chatPrompt,
+function Get-Chat {
+	<#
+	.SYNOPSIS
+	Provides an interactive assistant for PowerShell. Mostly a frontend to Get-AIChat
+	#>
+	[CmdletBinding()]
+	param(
+		#Provide a chat prompt to initiate the conversation
+		[string[]]$chatPrompt,
 
-# 		#If you just want the result and don't want to be prompted for further replies, specify this
-# 		[Switch]$NoReply,
+		#If you just want the result and don't want to be prompted for further replies, specify this
+		[Switch]$NoReply,
 
-# 		#By default, the latest code recommendation is copied to your clipboard, specify this to disable the behavior
-# 		[switch]$NoClipboard,
+		#By default, the latest code recommendation is copied to your clipboard, specify this to disable the behavior
+		[switch]$NoClipboard,
 
-# 		[ValidateNotNullOrEmpty()]
-# 		#Specify a prompt that guides Chat how to behave. By default, it is told to prefer PowerShell as a language.
-# 		[string]$SystemPrompt = 'PowerShell syntax and be brief',
+		[ValidateNotNullOrEmpty()]
+		#Specify a prompt that guides Chat how to behave. By default, it is told to prefer PowerShell as a language.
+		[string]$SystemPrompt = 'PowerShell syntax and be brief',
 
-# 		#Maximum tokens to generate. Defaults to 500 to minimize accidental API billing
-# 		[ValidateNotNullOrEmpty()]
-# 		[uint]$MaxTokens = 500,
+		#Maximum tokens to generate. Defaults to 500 to minimize accidental API billing
+		[ValidateNotNullOrEmpty()]
+		[uint]$MaxTokens = 500,
 
-# 		[ValidateNotNullOrEmpty()]
-# 		[string]$Model = [Models]::ChatGpt3_5Turbo
-# 		#TODO: Figure out how to autocomplete this
-# 	)
-# 	begin {
-# 		$ErrorActionPreference = 'Stop'
-# 		Assert-Connected
-# 		[List[ChatMessage]]$chatHistory = @(
-# 			[ChatMessage]::FromSystem($SystemPrompt)
-# 		)
-# 	}
-# 	process {
-# 		do {
-# 			$chatPrompt ??= Read-Host -Prompt 'You'
-# 			$chatHistory.Add(
-# 				[ChatMessage]::FromUser($chatPrompt)
-# 			)
-# 			$request = [ChatCompletionCreateRequest]@{
-# 				Messages  = $chatHistory
-# 				MaxTokens = $MaxTokens
-# 				Model     = $Model
-# 			}
+		[string]$Model
+		#TODO: Figure out how to autocomplete this
+	)
+	begin {
+		$ErrorActionPreference = 'Stop'
+		Assert-Connected
+		[List[ChatCompletionRequestMessage]]$chatHistory = @(
+			[ChatCompletionRequestMessage]@{
+				Role    = [ChatCompletionRequestMessageRole]::System
+				Content = $SystemPrompt
+			}
+		)
+	}
+	process {
+		do {
+			$chatPrompt ??= Read-Host -Prompt 'You'
+			foreach ($promptItem in $chatPrompt) {
+				$chatHistory.Add(
+					([ChatCompletionRequestMessage]$promptItem)
+				)
+			}
 
-# 			#TODO: Loop this and make it cancellable
-# 			[ResponseModels.ChatCompletionCreateResponse]$response = $client.
-# 			ChatCompletion.
-# 			CreateCompletion($request).
-# 			GetAwaiter().
-# 			GetResult()
+			$chatParams = @{
+				Prompt    = $chatHistory
+				MaxTokens = $MaxTokens
+			}
+			if ($Model) { $chatParams.Model = $Model }
 
-# 			if (-not $response.Successful) {
-# 				$errCode = $response.Error.Code ?? 'UNKNOWN'
-# 				$errMsg = $response.Error.Message ?? 'Unknown error'
-# 				Write-Error "$errCode - $errMsg"
-# 				return
-# 			}
+			$result = Get-AIChat @chatParams
 
-# 			$aiResponse = $response.Choices[0] ?? { throw new Exception('No response from AI. This is a probably a bug you should report.') }
+			foreach ($message in $result.Choices.Message) {
+				$chatHistory.Add([ChatCompletionRequestMessage]$message)
+			}
 
-# 			[string]$responseMessage = $aiResponse.Message.Content
+			$result
 
-# 			$chatHistory.Add(
-# 				[ChatMessage]::FromAssistance($responseMessage)
-# 			)
+			#TODO: Move this into the formatter
+			# switch ($aiResponse.FinishReason) {
+			# 	'stop' {} #This is the normal response
+			# 	'length' {
+			# 		Write-Warning "$MaxTokens tokens reached. Consider increasing the value of -MaxTokens for longer responses."
+			# 	}
+			# 	$null {
+			# 		Write-Debug 'Null FinishReason received. This seems to occur on occasion and may or may not be a bug.'
+			# 	}
+			# 	default {
+			# 		Write-Warning "Chat response finished abruply due to: $($aiResponse.FinishReason)"
+			# 	}
+			# }
 
-# 			$responseMessage
-# 			| Convert-ChatCodeToClipboard
-# 			| Format-ChatCode
-# 			| Write-Host -Fore DarkGray
-
-# 			#Handle various bugs that might occur
-# 			if ($aiResponse.Message.Role -ne 'assistant') {
-# 				Write-Warning 'Chat response was not from the assistant. This is a probably a bug you should report.'
-# 			}
-
-# 			switch ($aiResponse.FinishReason) {
-# 				'stop' {} #This is the normal response
-# 				'length' {
-# 					Write-Warning "$MaxTokens tokens reached. Consider increasing the value of -MaxTokens for longer responses."
-# 				}
-# 				$null {
-# 					Write-Debug 'Null FinishReason received. This seems to occur on occasion and may or may not be a bug.'
-# 				}
-# 				default {
-# 					Write-Warning "Chat response finished abruply due to: $($aiResponse.FinishReason)"
-# 				}
-# 			}
-
-# 			$chatPrompt = $null
-# 			if (-not $NoReply) {
-# 				Write-Host -Fore Cyan '<Ctrl-C to exit>'
-# 			}
-# 		} while (
-# 			-not $NoReply
-# 		)
-# 	}
-# }
+			$chatPrompt = $null
+			if (-not $NoReply) {
+				Write-Host -Fore Cyan '<Ctrl-C to exit>'
+			}
+		} while (
+			-not $NoReply
+		)
+	}
+}
 
 
 
@@ -431,7 +416,7 @@ function Update-GitHubCopilotToken {
 # 	$matchResult = $PSItem -match $fencedCodeBlockRegex
 # 	$savedMatches = $matches
 # 	$cbMatch = $savedMatches.($savedMatches.Keys | Sort-Object | Select-Object -Last 1)
-# 	if (-not $matchResult) {
+# 	if (-not $matchResult) {v
 # 		Write-Debug 'No code block detected, skipping this step'
 # 		return $PSItem
 # 	}
@@ -502,3 +487,33 @@ function Format-CreateChatCompletionResponse {
 		$Response.Choices
 	}
 }
+
+function Get-UsagePrice {
+	param(
+		[string]$Model,
+		[int]$Total
+	)
+
+	#Taken from: https://openai.com/pricing
+	$pricePerToken = @{
+		'gpt-3.5-turbo' = .002 / 1000
+		'ada'           = .0004 / 1000
+		'babbage'       = .0005 / 1000
+		'curie'         = .002 / 1000
+		'davinci'       = .002 / 1000
+	}
+
+	foreach ($priceItem in $pricePerToken.GetEnumerator()) {
+		if ($Model.Contains($priceItem.key)) {
+			#Will return the first match
+			$totalPrice = $total * $priceItem.Value
+
+			#Formats as currency ($3.2629) and strips trailing zeroes
+			return $totalPrice.ToString('C15').TrimEnd('0')
+		}
+	}
+
+	Write-Error "No Matching Pricing model found for model $Model"
+
+}
+
