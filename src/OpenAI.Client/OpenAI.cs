@@ -4,6 +4,8 @@
 // </auto-generated>
 //----------------------
 
+#nullable enable
+
 #pragma warning disable 108 // Disable "CS0108 '{derivedDto}.ToJson()' hides inherited member '{dtoBase}.ToJson()'. Use the new keyword if hiding was intended."
 #pragma warning disable 114 // Disable "CS0114 '{derivedDto}.RaisePropertyChanged(String)' hides inherited member 'dtoBase.RaisePropertyChanged(String)'. To make the current member override that implementation, add the override keyword. Otherwise add the new keyword."
 #pragma warning disable 472 // Disable "CS0472 The result of the expression is always 'false' since a value of type 'Int32' is never equal to 'null' of type 'Int32?'
@@ -33,6 +35,9 @@ namespace OpenAI
         private System.Text.Json.JsonSerializerOptions CreateSerializerSettings()
         {
             var settings = new System.Text.Json.JsonSerializerOptions();
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                settings.Converters.Add(converter);
             UpdateJsonSerializerSettings(settings);
             return settings;
         }
@@ -43,24 +48,13 @@ namespace OpenAI
             set { _baseUrl = value; }
         }
 
-        protected System.Text.Json.JsonSerializerOptions JsonSerializerSettings { get { return _settings.Value; } }
+        public System.Text.Json.JsonSerializerOptions JsonSerializerSettings { get { return _settings.Value; } }
 
         partial void UpdateJsonSerializerSettings(System.Text.Json.JsonSerializerOptions settings);
 
         partial void PrepareRequest(System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, string url);
         partial void PrepareRequest(System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, System.Text.StringBuilder urlBuilder);
         partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
-
-        /// <summary>
-        /// Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability.
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        [System.Obsolete]
-        public virtual System.Threading.Tasks.Task<ListEnginesResponse> ListEnginesAsync()
-        {
-            return ListEnginesAsync(System.Threading.CancellationToken.None);
-        }
 
         /// <summary>
         /// Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability.
@@ -80,7 +74,7 @@ namespace OpenAI
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual async System.Threading.Tasks.Task<ListEnginesResponse> ListEnginesAsync(System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<ListEnginesResponse> ListEnginesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/engines");
@@ -151,18 +145,6 @@ namespace OpenAI
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual System.Threading.Tasks.Task<Engine> RetrieveEngineAsync(string engine_id)
-        {
-            return RetrieveEngineAsync(engine_id, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Retrieves a model instance, providing basic information about it such as the owner and availability.
-        /// </summary>
-        /// <param name="engine_id">The ID of the engine to use for this request</param>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        [System.Obsolete]
         public virtual Engine RetrieveEngine(string engine_id)
         {
             return System.Threading.Tasks.Task.Run(async () => await RetrieveEngineAsync(engine_id, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -176,7 +158,7 @@ namespace OpenAI
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual async System.Threading.Tasks.Task<Engine> RetrieveEngineAsync(string engine_id, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<Engine> RetrieveEngineAsync(string engine_id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (engine_id == null)
                 throw new System.ArgumentNullException("engine_id");
@@ -249,16 +231,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<CreateCompletionResponse> CreateCompletionAsync(CreateCompletionRequest body)
-        {
-            return CreateCompletionAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Creates a completion for the provided prompt and parameters
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual CreateCompletionResponse CreateCompletion(CreateCompletionRequest body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateCompletionAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -270,7 +242,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<CreateCompletionResponse> CreateCompletionAsync(CreateCompletionRequest body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<CreateCompletionResponse> CreateCompletionAsync(CreateCompletionRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -346,16 +318,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<CreateChatCompletionResponse> CreateChatCompletionAsync(CreateChatCompletionRequest body)
-        {
-            return CreateChatCompletionAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Creates a completion for the chat message
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual CreateChatCompletionResponse CreateChatCompletion(CreateChatCompletionRequest body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateChatCompletionAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -367,7 +329,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<CreateChatCompletionResponse> CreateChatCompletionAsync(CreateChatCompletionRequest body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<CreateChatCompletionResponse> CreateChatCompletionAsync(CreateChatCompletionRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -443,16 +405,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<CreateEditResponse> CreateEditAsync(CreateEditRequest body)
-        {
-            return CreateEditAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Creates a new edit for the provided input, instruction, and parameters.
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual CreateEditResponse CreateEdit(CreateEditRequest body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateEditAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -464,7 +416,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<CreateEditResponse> CreateEditAsync(CreateEditRequest body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<CreateEditResponse> CreateEditAsync(CreateEditRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -540,16 +492,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<ImagesResponse> CreateImageAsync(CreateImageRequest body)
-        {
-            return CreateImageAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Creates an image given a prompt.
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual ImagesResponse CreateImage(CreateImageRequest body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateImageAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -561,7 +503,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<ImagesResponse> CreateImageAsync(CreateImageRequest body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<ImagesResponse> CreateImageAsync(CreateImageRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -637,16 +579,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<ImagesResponse> CreateImageEditAsync(System.IO.Stream body)
-        {
-            return CreateImageEditAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Creates an edited or extended image given an original image and a prompt.
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual ImagesResponse CreateImageEdit(System.IO.Stream body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateImageEditAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -658,7 +590,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<ImagesResponse> CreateImageEditAsync(System.IO.Stream body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<ImagesResponse> CreateImageEditAsync(System.IO.Stream body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -733,16 +665,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<ImagesResponse> CreateImageVariationAsync(System.IO.Stream body)
-        {
-            return CreateImageVariationAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Creates a variation of a given image.
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual ImagesResponse CreateImageVariation(System.IO.Stream body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateImageVariationAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -754,7 +676,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<ImagesResponse> CreateImageVariationAsync(System.IO.Stream body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<ImagesResponse> CreateImageVariationAsync(System.IO.Stream body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -829,16 +751,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<CreateEmbeddingResponse> CreateEmbeddingAsync(CreateEmbeddingRequest body)
-        {
-            return CreateEmbeddingAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Creates an embedding vector representing the input text.
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual CreateEmbeddingResponse CreateEmbedding(CreateEmbeddingRequest body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateEmbeddingAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -850,7 +762,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<CreateEmbeddingResponse> CreateEmbeddingAsync(CreateEmbeddingRequest body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<CreateEmbeddingResponse> CreateEmbeddingAsync(CreateEmbeddingRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -926,16 +838,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<CreateTranscriptionResponse> CreateTranscriptionAsync(System.IO.Stream body)
-        {
-            return CreateTranscriptionAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Transcribes audio into the input language.
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual CreateTranscriptionResponse CreateTranscription(System.IO.Stream body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateTranscriptionAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -947,7 +849,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<CreateTranscriptionResponse> CreateTranscriptionAsync(System.IO.Stream body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<CreateTranscriptionResponse> CreateTranscriptionAsync(System.IO.Stream body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -1022,16 +924,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<CreateTranslationResponse> CreateTranslationAsync(System.IO.Stream body)
-        {
-            return CreateTranslationAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Translates audio into into English.
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual CreateTranslationResponse CreateTranslation(System.IO.Stream body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateTranslationAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -1043,7 +935,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<CreateTranslationResponse> CreateTranslationAsync(System.IO.Stream body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<CreateTranslationResponse> CreateTranslationAsync(System.IO.Stream body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -1124,22 +1016,6 @@ namespace OpenAI
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual System.Threading.Tasks.Task<CreateSearchResponse> CreateSearchAsync(string engine_id, CreateSearchRequest body)
-        {
-            return CreateSearchAsync(engine_id, body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// The search endpoint computes similarity scores between provided query and documents. Documents can be passed directly to the API if there are no more than 200 of them.
-        /// <br/>
-        /// <br/>To go beyond the 200 document limit, documents can be processed offline and then used for efficient retrieval at query time. When `file` is set, the search endpoint searches over all the documents in the given file and returns up to the `max_rerank` number of documents. These documents will be returned along with their search scores.
-        /// <br/>
-        /// <br/>The similarity score is a positive score that usually ranges from 0 to 300 (but can sometimes go higher), where a score above 200 usually means the document is semantically similar to the query.
-        /// </summary>
-        /// <param name="engine_id">The ID of the engine to use for this request.  You can select one of `ada`, `babbage`, `curie`, or `davinci`.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        [System.Obsolete]
         public virtual CreateSearchResponse CreateSearch(string engine_id, CreateSearchRequest body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateSearchAsync(engine_id, body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -1157,7 +1033,7 @@ namespace OpenAI
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual async System.Threading.Tasks.Task<CreateSearchResponse> CreateSearchAsync(string engine_id, CreateSearchRequest body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<CreateSearchResponse> CreateSearchAsync(string engine_id, CreateSearchRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (engine_id == null)
                 throw new System.ArgumentNullException("engine_id");
@@ -1237,16 +1113,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<ListFilesResponse> ListFilesAsync()
-        {
-            return ListFilesAsync(System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Returns a list of files that belong to the user's organization.
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual ListFilesResponse ListFiles()
         {
             return System.Threading.Tasks.Task.Run(async () => await ListFilesAsync(System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -1258,7 +1124,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<ListFilesResponse> ListFilesAsync(System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<ListFilesResponse> ListFilesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/files");
@@ -1327,16 +1193,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<OpenAIFile> CreateFileAsync(System.IO.Stream body)
-        {
-            return CreateFileAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual OpenAIFile CreateFile(System.IO.Stream body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateFileAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -1348,7 +1204,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<OpenAIFile> CreateFileAsync(System.IO.Stream body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<OpenAIFile> CreateFileAsync(System.IO.Stream body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -1424,17 +1280,6 @@ namespace OpenAI
         /// <param name="file_id">The ID of the file to use for this request</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<DeleteFileResponse> DeleteFileAsync(string file_id)
-        {
-            return DeleteFileAsync(file_id, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Delete a file.
-        /// </summary>
-        /// <param name="file_id">The ID of the file to use for this request</param>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual DeleteFileResponse DeleteFile(string file_id)
         {
             return System.Threading.Tasks.Task.Run(async () => await DeleteFileAsync(file_id, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -1447,7 +1292,7 @@ namespace OpenAI
         /// <param name="file_id">The ID of the file to use for this request</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<DeleteFileResponse> DeleteFileAsync(string file_id, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<DeleteFileResponse> DeleteFileAsync(string file_id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (file_id == null)
                 throw new System.ArgumentNullException("file_id");
@@ -1521,17 +1366,6 @@ namespace OpenAI
         /// <param name="file_id">The ID of the file to use for this request</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<OpenAIFile> RetrieveFileAsync(string file_id)
-        {
-            return RetrieveFileAsync(file_id, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Returns information about a specific file.
-        /// </summary>
-        /// <param name="file_id">The ID of the file to use for this request</param>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual OpenAIFile RetrieveFile(string file_id)
         {
             return System.Threading.Tasks.Task.Run(async () => await RetrieveFileAsync(file_id, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -1544,7 +1378,7 @@ namespace OpenAI
         /// <param name="file_id">The ID of the file to use for this request</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<OpenAIFile> RetrieveFileAsync(string file_id, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<OpenAIFile> RetrieveFileAsync(string file_id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (file_id == null)
                 throw new System.ArgumentNullException("file_id");
@@ -1618,17 +1452,6 @@ namespace OpenAI
         /// <param name="file_id">The ID of the file to use for this request</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<string> DownloadFileAsync(string file_id)
-        {
-            return DownloadFileAsync(file_id, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Returns the contents of the specified file
-        /// </summary>
-        /// <param name="file_id">The ID of the file to use for this request</param>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual string DownloadFile(string file_id)
         {
             return System.Threading.Tasks.Task.Run(async () => await DownloadFileAsync(file_id, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -1641,7 +1464,7 @@ namespace OpenAI
         /// <param name="file_id">The ID of the file to use for this request</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<string> DownloadFileAsync(string file_id, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<string> DownloadFileAsync(string file_id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (file_id == null)
                 throw new System.ArgumentNullException("file_id");
@@ -1717,19 +1540,6 @@ namespace OpenAI
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual System.Threading.Tasks.Task<CreateAnswerResponse> CreateAnswerAsync(CreateAnswerRequest body)
-        {
-            return CreateAnswerAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Answers the specified question using the provided documents and examples.
-        /// <br/>
-        /// <br/>The endpoint first [searches](/docs/api-reference/searches) over provided documents or files to find relevant context. The relevant context is combined with the provided examples and question to create the prompt for [completion](/docs/api-reference/completions).
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        [System.Obsolete]
         public virtual CreateAnswerResponse CreateAnswer(CreateAnswerRequest body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateAnswerAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -1744,7 +1554,7 @@ namespace OpenAI
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual async System.Threading.Tasks.Task<CreateAnswerResponse> CreateAnswerAsync(CreateAnswerRequest body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<CreateAnswerResponse> CreateAnswerAsync(CreateAnswerRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -1829,25 +1639,6 @@ namespace OpenAI
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual System.Threading.Tasks.Task<CreateClassificationResponse> CreateClassificationAsync(CreateClassificationRequest body)
-        {
-            return CreateClassificationAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Classifies the specified `query` using provided examples.
-        /// <br/>
-        /// <br/>The endpoint first [searches](/docs/api-reference/searches) over the labeled examples
-        /// <br/>to select the ones most relevant for the particular query. Then, the relevant examples
-        /// <br/>are combined with the query to construct a prompt to produce the final label via the
-        /// <br/>[completions](/docs/api-reference/completions) endpoint.
-        /// <br/>
-        /// <br/>Labeled examples can be provided via an uploaded `file`, or explicitly listed in the
-        /// <br/>request using the `examples` parameter for quick tests and small scale use cases.
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        [System.Obsolete]
         public virtual CreateClassificationResponse CreateClassification(CreateClassificationRequest body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateClassificationAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -1868,7 +1659,7 @@ namespace OpenAI
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual async System.Threading.Tasks.Task<CreateClassificationResponse> CreateClassificationAsync(CreateClassificationRequest body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<CreateClassificationResponse> CreateClassificationAsync(CreateClassificationRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -1948,20 +1739,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<FineTune> CreateFineTuneAsync(CreateFineTuneRequest body)
-        {
-            return CreateFineTuneAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Creates a job that fine-tunes a specified model from a given dataset.
-        /// <br/>
-        /// <br/>Response includes details of the enqueued job including job status and the name of the fine-tuned models once complete.
-        /// <br/>
-        /// <br/>[Learn more about Fine-tuning](/docs/guides/fine-tuning)
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual FineTune CreateFineTune(CreateFineTuneRequest body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateFineTuneAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -1977,7 +1754,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<FineTune> CreateFineTuneAsync(CreateFineTuneRequest body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<FineTune> CreateFineTuneAsync(CreateFineTuneRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -2053,16 +1830,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<ListFineTunesResponse> ListFineTunesAsync()
-        {
-            return ListFineTunesAsync(System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// List your organization's fine-tuning jobs
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual ListFineTunesResponse ListFineTunes()
         {
             return System.Threading.Tasks.Task.Run(async () => await ListFineTunesAsync(System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -2074,7 +1841,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<ListFineTunesResponse> ListFineTunesAsync(System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<ListFineTunesResponse> ListFineTunesAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/fine-tunes");
@@ -2146,19 +1913,6 @@ namespace OpenAI
         /// <param name="fine_tune_id">The ID of the fine-tune job</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<FineTune> RetrieveFineTuneAsync(string fine_tune_id)
-        {
-            return RetrieveFineTuneAsync(fine_tune_id, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Gets info about the fine-tune job.
-        /// <br/>
-        /// <br/>[Learn more about Fine-tuning](/docs/guides/fine-tuning)
-        /// </summary>
-        /// <param name="fine_tune_id">The ID of the fine-tune job</param>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual FineTune RetrieveFineTune(string fine_tune_id)
         {
             return System.Threading.Tasks.Task.Run(async () => await RetrieveFineTuneAsync(fine_tune_id, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -2173,7 +1927,7 @@ namespace OpenAI
         /// <param name="fine_tune_id">The ID of the fine-tune job</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<FineTune> RetrieveFineTuneAsync(string fine_tune_id, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<FineTune> RetrieveFineTuneAsync(string fine_tune_id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (fine_tune_id == null)
                 throw new System.ArgumentNullException("fine_tune_id");
@@ -2247,17 +2001,6 @@ namespace OpenAI
         /// <param name="fine_tune_id">The ID of the fine-tune job to cancel</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<FineTune> CancelFineTuneAsync(string fine_tune_id)
-        {
-            return CancelFineTuneAsync(fine_tune_id, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Immediately cancel a fine-tune job.
-        /// </summary>
-        /// <param name="fine_tune_id">The ID of the fine-tune job to cancel</param>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual FineTune CancelFineTune(string fine_tune_id)
         {
             return System.Threading.Tasks.Task.Run(async () => await CancelFineTuneAsync(fine_tune_id, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -2270,7 +2013,7 @@ namespace OpenAI
         /// <param name="fine_tune_id">The ID of the fine-tune job to cancel</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<FineTune> CancelFineTuneAsync(string fine_tune_id, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<FineTune> CancelFineTuneAsync(string fine_tune_id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (fine_tune_id == null)
                 throw new System.ArgumentNullException("fine_tune_id");
@@ -2353,26 +2096,7 @@ namespace OpenAI
         /// <br/>If set to false, only events generated so far will be returned.</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<ListFineTuneEventsResponse> ListFineTuneEventsAsync(string fine_tune_id, bool? stream)
-        {
-            return ListFineTuneEventsAsync(fine_tune_id, stream, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Get fine-grained status updates for a fine-tune job.
-        /// </summary>
-        /// <param name="fine_tune_id">The ID of the fine-tune job to get events for.</param>
-        /// <param name="stream">Whether to stream events for the fine-tune job. If set to true,
-        /// <br/>events will be sent as data-only
-        /// <br/>[server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format)
-        /// <br/>as they become available. The stream will terminate with a
-        /// <br/>`data: [DONE]` message when the job is finished (succeeded, cancelled,
-        /// <br/>or failed).
-        /// <br/>
-        /// <br/>If set to false, only events generated so far will be returned.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual ListFineTuneEventsResponse ListFineTuneEvents(string fine_tune_id, bool? stream)
+        public virtual ListFineTuneEventsResponse ListFineTuneEvents(string fine_tune_id, bool? stream = null)
         {
             return System.Threading.Tasks.Task.Run(async () => await ListFineTuneEventsAsync(fine_tune_id, stream, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
         }
@@ -2392,7 +2116,7 @@ namespace OpenAI
         /// <br/>If set to false, only events generated so far will be returned.</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<ListFineTuneEventsResponse> ListFineTuneEventsAsync(string fine_tune_id, bool? stream, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<ListFineTuneEventsResponse> ListFineTuneEventsAsync(string fine_tune_id, bool? stream = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (fine_tune_id == null)
                 throw new System.ArgumentNullException("fine_tune_id");
@@ -2470,16 +2194,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<ListModelsResponse> ListModelsAsync()
-        {
-            return ListModelsAsync(System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Lists the currently available models, and provides basic information about each one such as the owner and availability.
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual ListModelsResponse ListModels()
         {
             return System.Threading.Tasks.Task.Run(async () => await ListModelsAsync(System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -2491,7 +2205,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<ListModelsResponse> ListModelsAsync(System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<ListModelsResponse> ListModelsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/models");
@@ -2561,17 +2275,6 @@ namespace OpenAI
         /// <param name="model">The ID of the model to use for this request</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<Model> RetrieveModelAsync(string model)
-        {
-            return RetrieveModelAsync(model, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Retrieves a model instance, providing basic information about the model such as the owner and permissioning.
-        /// </summary>
-        /// <param name="model">The ID of the model to use for this request</param>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual Model RetrieveModel(string model)
         {
             return System.Threading.Tasks.Task.Run(async () => await RetrieveModelAsync(model, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -2584,7 +2287,7 @@ namespace OpenAI
         /// <param name="model">The ID of the model to use for this request</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<Model> RetrieveModelAsync(string model, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<Model> RetrieveModelAsync(string model, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (model == null)
                 throw new System.ArgumentNullException("model");
@@ -2658,17 +2361,6 @@ namespace OpenAI
         /// <param name="model">The model to delete</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<DeleteModelResponse> DeleteModelAsync(string model)
-        {
-            return DeleteModelAsync(model, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Delete a fine-tuned model. You must have the Owner role in your organization.
-        /// </summary>
-        /// <param name="model">The model to delete</param>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual DeleteModelResponse DeleteModel(string model)
         {
             return System.Threading.Tasks.Task.Run(async () => await DeleteModelAsync(model, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -2681,7 +2373,7 @@ namespace OpenAI
         /// <param name="model">The model to delete</param>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<DeleteModelResponse> DeleteModelAsync(string model, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<DeleteModelResponse> DeleteModelAsync(string model, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (model == null)
                 throw new System.ArgumentNullException("model");
@@ -2754,16 +2446,6 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<CreateModerationResponse> CreateModerationAsync(CreateModerationRequest body)
-        {
-            return CreateModerationAsync(body, System.Threading.CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Classifies if text violates OpenAI's Content Policy
-        /// </summary>
-        /// <returns>OK</returns>
-        /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
         public virtual CreateModerationResponse CreateModeration(CreateModerationRequest body)
         {
             return System.Threading.Tasks.Task.Run(async () => await CreateModerationAsync(body, System.Threading.CancellationToken.None)).GetAwaiter().GetResult();
@@ -2775,7 +2457,7 @@ namespace OpenAI
         /// </summary>
         /// <returns>OK</returns>
         /// <exception cref="OpenAiApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<CreateModerationResponse> CreateModerationAsync(CreateModerationRequest body, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<CreateModerationResponse> CreateModerationAsync(CreateModerationRequest body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
         {
             if (body == null)
                 throw new System.ArgumentNullException("body");
@@ -2865,7 +2547,7 @@ namespace OpenAI
         {
             if (response == null || response.Content == null)
             {
-                return new ObjectResponseResult<T>(default(T), string.Empty);
+                return new ObjectResponseResult<T>(default(T)!, string.Empty);
             }
 
             if (ReadResponseAsString)
@@ -2874,7 +2556,7 @@ namespace OpenAI
                 try
                 {
                     var typedBody = System.Text.Json.JsonSerializer.Deserialize<T>(responseText, JsonSerializerSettings);
-                    return new ObjectResponseResult<T>(typedBody, responseText);
+                    return new ObjectResponseResult<T>(typedBody!, responseText);
                 }
                 catch (System.Text.Json.JsonException exception)
                 {
@@ -2889,7 +2571,7 @@ namespace OpenAI
                     using (var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                     {
                         var typedBody = await System.Text.Json.JsonSerializer.DeserializeAsync<T>(responseStream, JsonSerializerSettings, cancellationToken).ConfigureAwait(false);
-                        return new ObjectResponseResult<T>(typedBody, string.Empty);
+                        return new ObjectResponseResult<T>(typedBody!, string.Empty);
                     }
                 }
                 catch (System.Text.Json.JsonException exception)
@@ -2900,7 +2582,7 @@ namespace OpenAI
             }
         }
 
-        private string ConvertToString(object value, System.Globalization.CultureInfo cultureInfo)
+        private string ConvertToString(object? value, System.Globalization.CultureInfo cultureInfo)
         {
             if (value == null)
             {
@@ -2951,18 +2633,49 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("data")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<Engine> Data { get; set; } = new System.Collections.ObjectModel.Collection<Engine>();
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static ListEnginesResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<ListEnginesResponse>(data, options);
+
         }
 
     }
@@ -2972,18 +2685,49 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("data")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<Model> Data { get; set; } = new System.Collections.ObjectModel.Collection<Model>();
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static ListModelsResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<ListModelsResponse>(data, options);
+
         }
 
     }
@@ -2993,21 +2737,54 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Id { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("deleted")]
-        public bool Deleted { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public bool Deleted { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static DeleteModelResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<DeleteModelResponse>(data, options);
+
         }
 
     }
@@ -3020,7 +2797,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         /// <summary>
         /// The prompt(s) to generate completions for, encoded as a string, array of strings, array of tokens, or array of token arrays.
@@ -3031,8 +2811,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("prompt")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Prompt { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Prompt { get; set; } = default!;
 
         /// <summary>
         /// The suffix that comes after a completion of inserted text.
@@ -3040,8 +2820,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("suffix")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Suffix { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Suffix { get; set; } = default!;
 
         /// <summary>
         /// The maximum number of [tokens](/tokenizer) to generate in the completion.
@@ -3052,7 +2832,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("max_tokens")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(0, int.MaxValue)]
         public int? Max_tokens { get; set; } = 16;
 
         /// <summary>
@@ -3064,7 +2845,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("temperature")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(0D, 2D)]
         public double? Temperature { get; set; } = 1D;
 
         /// <summary>
@@ -3076,7 +2858,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("top_p")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(0D, 1D)]
         public double? Top_p { get; set; } = 1D;
 
         /// <summary>
@@ -3088,7 +2871,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("n")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(1, 128)]
         public int? N { get; set; } = 1;
 
         /// <summary>
@@ -3098,7 +2882,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("stream")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public bool? Stream { get; set; } = false;
 
         /// <summary>
@@ -3110,8 +2894,9 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("logprobs")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public int? Logprobs { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(0, 5)]
+        public int? Logprobs { get; set; } = default!;
 
         /// <summary>
         /// Echo back the prompt in addition to the completion
@@ -3120,7 +2905,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("echo")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public bool? Echo { get; set; } = false;
 
         /// <summary>
@@ -3130,8 +2915,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("stop")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<string> Stop { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<string>? Stop { get; set; } = default!;
 
         /// <summary>
         /// Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.
@@ -3142,7 +2927,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("presence_penalty")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(-2D, 2D)]
         public double? Presence_penalty { get; set; } = 0D;
 
         /// <summary>
@@ -3154,7 +2940,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("frequency_penalty")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(-2D, 2D)]
         public double? Frequency_penalty { get; set; } = 0D;
 
         /// <summary>
@@ -3168,7 +2955,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("best_of")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(0, 20)]
         public int? Best_of { get; set; } = 1;
 
         /// <summary>
@@ -3182,8 +2970,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("logit_bias")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public object Logit_bias { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public object? Logit_bias { get; set; } = default!;
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
@@ -3192,16 +2980,41 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("user")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string User { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? User { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateCompletionRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateCompletionRequest>(data, options);
+
         }
 
     }
@@ -3211,32 +3024,71 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Id { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("created")]
-        public int Created { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Created { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("choices")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<Choices> Choices { get; set; } = new System.Collections.ObjectModel.Collection<Choices>();
 
         [System.Text.Json.Serialization.JsonPropertyName("usage")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public Usage Usage { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public Usage? Usage { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateCompletionResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateCompletionResponse>(data, options);
+
         }
 
     }
@@ -3249,15 +3101,20 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("role")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
-        public ChatCompletionRequestMessageRole Role { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public ChatCompletionRequestMessageRole Role { get; set; } = default!;
 
         /// <summary>
         /// The contents of the message
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public string Content { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Content { get; set; } = default!;
 
         /// <summary>
         /// The name of the user in a multi-user chat
@@ -3265,16 +3122,41 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("name")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Name { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Name { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static ChatCompletionRequestMessage FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<ChatCompletionRequestMessage>(data, options);
+
         }
 
     }
@@ -3287,23 +3169,53 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("role")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
-        public ChatCompletionResponseMessageRole Role { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public ChatCompletionResponseMessageRole Role { get; set; } = default!;
 
         /// <summary>
         /// The contents of the message
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("content")]
-        public string Content { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Content { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static ChatCompletionResponseMessage FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<ChatCompletionResponseMessage>(data, options);
+
         }
 
     }
@@ -3316,13 +3228,20 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         /// <summary>
         /// The messages to generate chat completions for, in the [chat format](/docs/guides/chat/introduction).
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("messages")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.MinLength(1)]
         public System.Collections.Generic.ICollection<ChatCompletionRequestMessage> Messages { get; set; } = new System.Collections.ObjectModel.Collection<ChatCompletionRequestMessage>();
 
         /// <summary>
@@ -3334,7 +3253,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("temperature")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(0D, 2D)]
         public double? Temperature { get; set; } = 1D;
 
         /// <summary>
@@ -3346,7 +3266,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("top_p")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(0D, 1D)]
         public double? Top_p { get; set; } = 1D;
 
         /// <summary>
@@ -3355,7 +3276,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("n")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(1, 128)]
         public int? N { get; set; } = 1;
 
         /// <summary>
@@ -3365,7 +3287,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("stream")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public bool? Stream { get; set; } = false;
 
         /// <summary>
@@ -3375,8 +3297,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("stop")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<string> Stop { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<string>? Stop { get; set; } = default!;
 
         /// <summary>
         /// The maximum number of tokens allowed for the generated answer. By default, the number of tokens the model can return will be (4096 - prompt tokens).
@@ -3385,8 +3307,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("max_tokens")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public int Max_tokens { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public int? Max_tokens { get; set; } = default!;
 
         /// <summary>
         /// Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.
@@ -3397,7 +3319,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("presence_penalty")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(-2D, 2D)]
         public double? Presence_penalty { get; set; } = 0D;
 
         /// <summary>
@@ -3409,7 +3332,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("frequency_penalty")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(-2D, 2D)]
         public double? Frequency_penalty { get; set; } = 0D;
 
         /// <summary>
@@ -3421,8 +3345,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("logit_bias")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public object Logit_bias { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public object? Logit_bias { get; set; } = default!;
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
@@ -3431,16 +3355,41 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("user")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string User { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? User { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateChatCompletionRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateChatCompletionRequest>(data, options);
+
         }
 
     }
@@ -3450,32 +3399,71 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Id { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("created")]
-        public int Created { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Created { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("choices")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<Choices2> Choices { get; set; } = new System.Collections.ObjectModel.Collection<Choices2>();
 
         [System.Text.Json.Serialization.JsonPropertyName("usage")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public Usage2 Usage { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public Usage2? Usage { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateChatCompletionResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateChatCompletionResponse>(data, options);
+
         }
 
     }
@@ -3488,7 +3476,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         /// <summary>
         /// The input text to use as a starting point for the edit.
@@ -3496,15 +3487,18 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("input")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Input { get; set; } = "";
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Input { get; set; } = "";
 
         /// <summary>
         /// The instruction that tells the model how to edit the prompt.
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("instruction")]
-        public string Instruction { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Instruction { get; set; } = default!;
 
         /// <summary>
         /// How many edits to generate for the input and instruction.
@@ -3512,7 +3506,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("n")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(1, 20)]
         public int? N { get; set; } = 1;
 
         /// <summary>
@@ -3524,7 +3519,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("temperature")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(0D, 2D)]
         public double? Temperature { get; set; } = 1D;
 
         /// <summary>
@@ -3536,16 +3532,42 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("top_p")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(0D, 1D)]
         public double? Top_p { get; set; } = 1D;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateEditRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateEditRequest>(data, options);
+
         }
 
     }
@@ -3555,24 +3577,60 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("created")]
-        public int Created { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Created { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("choices")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<Choices3> Choices { get; set; } = new System.Collections.ObjectModel.Collection<Choices3>();
 
         [System.Text.Json.Serialization.JsonPropertyName("usage")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public Usage3 Usage { get; set; } = new Usage3();
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateEditResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateEditResponse>(data, options);
+
         }
 
     }
@@ -3585,7 +3643,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("prompt")]
-        public string Prompt { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Prompt { get; set; } = default!;
 
         /// <summary>
         /// The number of images to generate. Must be between 1 and 10.
@@ -3593,7 +3654,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("n")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(1, 10)]
         public int? N { get; set; } = 1;
 
         /// <summary>
@@ -3602,8 +3664,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("size")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public CreateImageRequestSize? Size { get; set; } = OpenAI.CreateImageRequestSize._1024x1024;
 
         /// <summary>
@@ -3612,8 +3673,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("response_format")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public CreateImageRequestResponse_format? Response_format { get; set; } = OpenAI.CreateImageRequestResponse_format.Url;
 
         /// <summary>
@@ -3623,16 +3683,41 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("user")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string User { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? User { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateImageRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateImageRequest>(data, options);
+
         }
 
     }
@@ -3642,18 +3727,48 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("created")]
-        public int Created { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Created { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("data")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<Data> Data { get; set; } = new System.Collections.ObjectModel.Collection<Data>();
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static ImagesResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<ImagesResponse>(data, options);
+
         }
 
     }
@@ -3666,7 +3781,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("image")]
-        public byte[] Image { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public byte[] Image { get; set; } = default!;
 
         /// <summary>
         /// An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where `image` should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as `image`.
@@ -3674,15 +3792,18 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("mask")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public byte[] Mask { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public byte[]? Mask { get; set; } = default!;
 
         /// <summary>
         /// A text description of the desired image(s). The maximum length is 1000 characters.
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("prompt")]
-        public string Prompt { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Prompt { get; set; } = default!;
 
         /// <summary>
         /// The number of images to generate. Must be between 1 and 10.
@@ -3690,7 +3811,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("n")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(1, 10)]
         public int? N { get; set; } = 1;
 
         /// <summary>
@@ -3699,8 +3821,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("size")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public CreateImageEditRequestSize? Size { get; set; } = OpenAI.CreateImageEditRequestSize._1024x1024;
 
         /// <summary>
@@ -3709,8 +3830,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("response_format")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public CreateImageEditRequestResponse_format? Response_format { get; set; } = OpenAI.CreateImageEditRequestResponse_format.Url;
 
         /// <summary>
@@ -3720,16 +3840,41 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("user")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string User { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? User { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateImageEditRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateImageEditRequest>(data, options);
+
         }
 
     }
@@ -3742,7 +3887,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("image")]
-        public byte[] Image { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public byte[] Image { get; set; } = default!;
 
         /// <summary>
         /// The number of images to generate. Must be between 1 and 10.
@@ -3750,7 +3898,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("n")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(1, 10)]
         public int? N { get; set; } = 1;
 
         /// <summary>
@@ -3759,8 +3908,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("size")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public CreateImageVariationRequestSize? Size { get; set; } = OpenAI.CreateImageVariationRequestSize._1024x1024;
 
         /// <summary>
@@ -3769,8 +3917,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("response_format")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public CreateImageVariationRequestResponse_format? Response_format { get; set; } = OpenAI.CreateImageVariationRequestResponse_format.Url;
 
         /// <summary>
@@ -3780,16 +3927,41 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("user")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string User { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? User { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateImageVariationRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateImageVariationRequest>(data, options);
+
         }
 
     }
@@ -3802,7 +3974,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("input")]
-        public string Input { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Input { get; set; } = default!;
 
         /// <summary>
         /// Two content moderations models are available: `text-moderation-stable` and `text-moderation-latest`.
@@ -3813,16 +3988,41 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Model { get; set; } = "text-moderation-latest";
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Model { get; set; } = "text-moderation-latest";
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateModerationRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateModerationRequest>(data, options);
+
         }
 
     }
@@ -3832,21 +4032,55 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Id { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("results")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<Results> Results { get; set; } = new System.Collections.ObjectModel.Collection<Results>();
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateModerationResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateModerationResponse>(data, options);
+
         }
 
     }
@@ -3859,7 +4093,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("query")]
-        public string Query { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Query { get; set; } = default!;
 
         /// <summary>
         /// Up to 200 documents to search over, provided as a list of strings.
@@ -3872,8 +4109,10 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("documents")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<string> Documents { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.MinLength(1)]
+        [System.ComponentModel.DataAnnotations.MaxLength(200)]
+        public System.Collections.Generic.ICollection<string>? Documents { get; set; } = default!;
 
         /// <summary>
         /// The ID of an uploaded file that contains documents to search over.
@@ -3884,8 +4123,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("file")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string File { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? File { get; set; } = default!;
 
         /// <summary>
         /// The maximum number of documents to be re-ranked and returned by search.
@@ -3896,7 +4135,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("max_rerank")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue)]
         public int? Max_rerank { get; set; } = 200;
 
         /// <summary>
@@ -3908,7 +4148,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("return_metadata")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public bool? Return_metadata { get; set; } = false;
 
         /// <summary>
@@ -3918,16 +4158,41 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("user")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string User { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? User { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateSearchRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateSearchRequest>(data, options);
+
         }
 
     }
@@ -3938,26 +4203,51 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Object { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Model { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Model { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("data")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<Data2> Data { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<Data2>? Data { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateSearchResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateSearchResponse>(data, options);
+
         }
 
     }
@@ -3967,18 +4257,49 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("data")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<OpenAIFile> Data { get; set; } = new System.Collections.ObjectModel.Collection<OpenAIFile>();
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static ListFilesResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<ListFilesResponse>(data, options);
+
         }
 
     }
@@ -3994,7 +4315,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("file")]
-        public byte[] File { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public byte[] File { get; set; } = default!;
 
         /// <summary>
         /// The intended purpose of the uploaded documents.
@@ -4004,7 +4328,35 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("purpose")]
-        public string Purpose { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Purpose { get; set; } = default!;
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateFileRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateFileRequest>(data, options);
+
+        }
 
     }
 
@@ -4013,21 +4365,54 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Id { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("deleted")]
-        public bool Deleted { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public bool Deleted { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static DeleteFileResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<DeleteFileResponse>(data, options);
+
         }
 
     }
@@ -4040,20 +4425,31 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         /// <summary>
         /// Question to get answered.
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("question")]
-        public string Question { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Question { get; set; } = default!;
 
         /// <summary>
         /// List of (question, answer) pairs that will help steer the model towards the tone and answer format you'd like. We recommend adding 2 to 3 examples.
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("examples")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.MinLength(1)]
+        [System.ComponentModel.DataAnnotations.MaxLength(200)]
         public System.Collections.Generic.ICollection<System.Collections.Generic.ICollection<string>> Examples { get; set; } = new System.Collections.ObjectModel.Collection<System.Collections.Generic.ICollection<string>>();
 
         /// <summary>
@@ -4061,7 +4457,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("examples_context")]
-        public string Examples_context { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Examples_context { get; set; } = default!;
 
         /// <summary>
         /// List of documents from which the answer for the input `question` should be derived. If this is an empty list, the question will be answered based on the question-answer examples.
@@ -4072,8 +4471,9 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("documents")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<string> Documents { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.MaxLength(200)]
+        public System.Collections.Generic.ICollection<string>? Documents { get; set; } = default!;
 
         /// <summary>
         /// The ID of an uploaded file that contains documents to search over. See [upload file](/docs/api-reference/files/upload) for how to upload a file of the desired format and purpose.
@@ -4084,8 +4484,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("file")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string File { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? File { get; set; } = default!;
 
         /// <summary>
         /// ID of the model to use for [Search](/docs/api-reference/searches/create). You can select one of `ada`, `babbage`, `curie`, or `davinci`.
@@ -4093,8 +4493,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("search_model")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Search_model { get; set; } = "ada";
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Search_model { get; set; } = "ada";
 
         /// <summary>
         /// The maximum number of documents to be ranked by [Search](/docs/api-reference/searches/create) when using `file`. Setting it to a higher value leads to improved accuracy but with increased latency and cost.
@@ -4102,7 +4502,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("max_rerank")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public int? Max_rerank { get; set; } = 200;
 
         /// <summary>
@@ -4111,7 +4511,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("temperature")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public double? Temperature { get; set; } = 0D;
 
         /// <summary>
@@ -4125,8 +4525,9 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("logprobs")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public int? Logprobs { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(0, 5)]
+        public int? Logprobs { get; set; } = default!;
 
         /// <summary>
         /// The maximum number of tokens allowed for the generated answer
@@ -4134,7 +4535,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("max_tokens")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public int? Max_tokens { get; set; } = 16;
 
         /// <summary>
@@ -4144,8 +4545,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("stop")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Stop { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Stop { get; set; } = default!;
 
         /// <summary>
         /// How many answers to generate for each question.
@@ -4153,7 +4554,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("n")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(1, 10)]
         public int? N { get; set; } = 1;
 
         /// <summary>
@@ -4167,8 +4569,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("logit_bias")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public object Logit_bias { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public object? Logit_bias { get; set; } = default!;
 
         /// <summary>
         /// A special boolean flag for showing metadata. If set to `true`, each document entry in the returned JSON will contain a "metadata" field.
@@ -4179,7 +4581,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("return_metadata")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public bool? Return_metadata { get; set; } = false;
 
         /// <summary>
@@ -4188,7 +4590,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("return_prompt")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public bool? Return_prompt { get; set; } = false;
 
         /// <summary>
@@ -4197,8 +4599,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("expand")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<object> Expand { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<object>? Expand { get; set; } = default!;
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
@@ -4207,8 +4609,33 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("user")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string User { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? User { get; set; } = default!;
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateAnswerRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateAnswerRequest>(data, options);
+
+        }
 
     }
 
@@ -4218,41 +4645,66 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Object { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Model { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Model { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("search_model")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Search_model { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Search_model { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("completion")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Completion { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Completion { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("answers")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<string> Answers { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<string>? Answers { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("selected_documents")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<Selected_documents> Selected_documents { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<Selected_documents>? Selected_documents { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateAnswerResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateAnswerResponse>(data, options);
+
         }
 
     }
@@ -4265,14 +4717,20 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         /// <summary>
         /// Query to be classified.
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("query")]
-        public string Query { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Query { get; set; } = default!;
 
         /// <summary>
         /// A list of examples with labels, in the following format:
@@ -4287,8 +4745,10 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("examples")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<System.Collections.Generic.ICollection<string>> Examples { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.MinLength(2)]
+        [System.ComponentModel.DataAnnotations.MaxLength(200)]
+        public System.Collections.Generic.ICollection<System.Collections.Generic.ICollection<string>>? Examples { get; set; } = default!;
 
         /// <summary>
         /// The ID of the uploaded file that contains training examples. See [upload file](/docs/api-reference/files/upload) for how to upload a file of the desired format and purpose.
@@ -4299,8 +4759,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("file")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string File { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? File { get; set; } = default!;
 
         /// <summary>
         /// The set of categories being classified. If not specified, candidate labels will be automatically collected from the examples you provide. All the label strings will be normalized to be capitalized.
@@ -4308,8 +4768,10 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("labels")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<string> Labels { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.MinLength(2)]
+        [System.ComponentModel.DataAnnotations.MaxLength(200)]
+        public System.Collections.Generic.ICollection<string>? Labels { get; set; } = default!;
 
         /// <summary>
         /// ID of the model to use for [Search](/docs/api-reference/searches/create). You can select one of `ada`, `babbage`, `curie`, or `davinci`.
@@ -4317,8 +4779,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("search_model")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Search_model { get; set; } = "ada";
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Search_model { get; set; } = "ada";
 
         /// <summary>
         /// What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
@@ -4326,7 +4788,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("temperature")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(0D, 2D)]
         public double? Temperature { get; set; } = 0D;
 
         /// <summary>
@@ -4340,8 +4803,9 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("logprobs")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public int? Logprobs { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.Range(0, 5)]
+        public int? Logprobs { get; set; } = default!;
 
         /// <summary>
         /// The maximum number of examples to be ranked by [Search](/docs/api-reference/searches/create) when using `file`. Setting it to a higher value leads to improved accuracy but with increased latency and cost.
@@ -4349,7 +4813,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("max_examples")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public int? Max_examples { get; set; } = 200;
 
         /// <summary>
@@ -4363,8 +4827,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("logit_bias")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public object Logit_bias { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public object? Logit_bias { get; set; } = default!;
 
         /// <summary>
         /// If set to `true`, the returned JSON will include a "prompt" field containing the final prompt that was used to request a completion. This is mainly useful for debugging purposes.
@@ -4372,7 +4836,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("return_prompt")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public bool? Return_prompt { get; set; } = false;
 
         /// <summary>
@@ -4384,7 +4848,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("return_metadata")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public bool? Return_metadata { get; set; } = false;
 
         /// <summary>
@@ -4393,8 +4857,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("expand")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<object> Expand { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<object>? Expand { get; set; } = default!;
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
@@ -4403,8 +4867,33 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("user")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string User { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? User { get; set; } = default!;
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateClassificationRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateClassificationRequest>(data, options);
+
+        }
 
     }
 
@@ -4414,41 +4903,66 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Object { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Model { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Model { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("search_model")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Search_model { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Search_model { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("completion")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Completion { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Completion { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("label")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Label { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Label { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("selected_examples")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<Selected_examples> Selected_examples { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<Selected_examples>? Selected_examples { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateClassificationResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateClassificationResponse>(data, options);
+
         }
 
     }
@@ -4470,7 +4984,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("training_file")]
-        public string Training_file { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Training_file { get; set; } = default!;
 
         /// <summary>
         /// The ID of an uploaded file that contains validation data.
@@ -4490,8 +5007,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("validation_file")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Validation_file { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Validation_file { get; set; } = default!;
 
         /// <summary>
         /// The name of the base model to fine-tune. You can select one of "ada",
@@ -4503,8 +5020,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Model { get; set; } = "curie";
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Model { get; set; } = "curie";
 
         /// <summary>
         /// The number of epochs to train the model for. An epoch refers to one
@@ -4514,7 +5031,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("n_epochs")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public int? N_epochs { get; set; } = 4;
 
         /// <summary>
@@ -4530,8 +5047,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("batch_size")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public int? Batch_size { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public int? Batch_size { get; set; } = default!;
 
         /// <summary>
         /// The learning rate multiplier to use for training.
@@ -4548,8 +5065,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("learning_rate_multiplier")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public double? Learning_rate_multiplier { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public double? Learning_rate_multiplier { get; set; } = default!;
 
         /// <summary>
         /// The weight to use for loss on the prompt tokens. This controls how
@@ -4565,7 +5082,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("prompt_loss_weight")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public double? Prompt_loss_weight { get; set; } = 0.01D;
 
         /// <summary>
@@ -4582,7 +5099,7 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("compute_classification_metrics")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public bool? Compute_classification_metrics { get; set; } = false;
 
         /// <summary>
@@ -4594,8 +5111,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("classification_n_classes")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public int? Classification_n_classes { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public int? Classification_n_classes { get; set; } = default!;
 
         /// <summary>
         /// The positive class in binary classification.
@@ -4607,8 +5124,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("classification_positive_class")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Classification_positive_class { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Classification_positive_class { get; set; } = default!;
 
         /// <summary>
         /// If this is provided, we calculate F-beta scores at the specified
@@ -4624,8 +5141,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("classification_betas")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<double> Classification_betas { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<double>? Classification_betas { get; set; } = default!;
 
         /// <summary>
         /// A string of up to 40 characters that will be added to your fine-tuned model name.
@@ -4636,16 +5153,42 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("suffix")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Suffix { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        [System.ComponentModel.DataAnnotations.StringLength(40, MinimumLength = 1)]
+        public string? Suffix { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateFineTuneRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateFineTuneRequest>(data, options);
+
         }
 
     }
@@ -4655,18 +5198,49 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("data")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<FineTune> Data { get; set; } = new System.Collections.ObjectModel.Collection<FineTune>();
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static ListFineTunesResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<ListFineTunesResponse>(data, options);
+
         }
 
     }
@@ -4676,18 +5250,49 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("data")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<FineTuneEvent> Data { get; set; } = new System.Collections.ObjectModel.Collection<FineTuneEvent>();
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static ListFineTuneEventsResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<ListFineTuneEventsResponse>(data, options);
+
         }
 
     }
@@ -4700,7 +5305,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         /// <summary>
         /// Input text to get embeddings for, encoded as a string or array of tokens. To get embeddings for multiple inputs in a single request, pass an array of strings or array of token arrays. Each input must not exceed 8192 tokens in length.
@@ -4708,7 +5316,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("input")]
-        public string Input { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Input { get; set; } = default!;
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).
@@ -4717,8 +5328,33 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("user")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string User { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? User { get; set; } = default!;
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateEmbeddingRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateEmbeddingRequest>(data, options);
+
+        }
 
     }
 
@@ -4727,24 +5363,61 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("data")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<Data3> Data { get; set; } = new System.Collections.ObjectModel.Collection<Data3>();
 
         [System.Text.Json.Serialization.JsonPropertyName("usage")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public Usage4 Usage { get; set; } = new Usage4();
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateEmbeddingResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateEmbeddingResponse>(data, options);
+
         }
 
     }
@@ -4758,7 +5431,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("file")]
-        public byte[] File { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public byte[] File { get; set; } = default!;
 
         /// <summary>
         /// ID of the model to use. Only `whisper-1` is currently available.
@@ -4766,7 +5442,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         /// <summary>
         /// An optional text to guide the model's style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.
@@ -4775,8 +5454,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("prompt")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Prompt { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Prompt { get; set; } = default!;
 
         /// <summary>
         /// The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -4785,8 +5464,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("response_format")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Response_format { get; set; } = "json";
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Response_format { get; set; } = "json";
 
         /// <summary>
         /// The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
@@ -4795,8 +5474,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("temperature")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public double Temperature { get; set; } = 0D;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public double? Temperature { get; set; } = 0D;
 
         /// <summary>
         /// The language of the input audio. Supplying the input language in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format will improve accuracy and latency.
@@ -4805,8 +5484,33 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("language")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Language { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Language { get; set; } = default!;
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateTranscriptionRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateTranscriptionRequest>(data, options);
+
+        }
 
     }
 
@@ -4815,15 +5519,43 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("text")]
-        public string Text { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Text { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateTranscriptionResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateTranscriptionResponse>(data, options);
+
         }
 
     }
@@ -4837,7 +5569,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("file")]
-        public byte[] File { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public byte[] File { get; set; } = default!;
 
         /// <summary>
         /// ID of the model to use. Only `whisper-1` is currently available.
@@ -4845,7 +5580,10 @@ namespace OpenAI
         /// </summary>
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         /// <summary>
         /// An optional text to guide the model's style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.
@@ -4854,8 +5592,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("prompt")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Prompt { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Prompt { get; set; } = default!;
 
         /// <summary>
         /// The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.
@@ -4864,8 +5602,8 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("response_format")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Response_format { get; set; } = "json";
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Response_format { get; set; } = "json";
 
         /// <summary>
         /// The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.
@@ -4874,8 +5612,33 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("temperature")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public double Temperature { get; set; } = 0D;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public double? Temperature { get; set; } = 0D;
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateTranslationRequest FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateTranslationRequest>(data, options);
+
+        }
 
     }
 
@@ -4884,15 +5647,43 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("text")]
-        public string Text { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Text { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static CreateTranslationResponse FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<CreateTranslationResponse>(data, options);
+
         }
 
     }
@@ -4902,24 +5693,59 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Id { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("created")]
-        public int? Created { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int? Created { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("ready")]
-        public bool Ready { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public bool Ready { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Engine FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Engine>(data, options);
+
         }
 
     }
@@ -4929,24 +5755,60 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Id { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("created")]
-        public int Created { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Created { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("owned_by")]
-        public string Owned_by { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Owned_by { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Model FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Model>(data, options);
+
         }
 
     }
@@ -4956,40 +5818,81 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Id { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("bytes")]
-        public int Bytes { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Bytes { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("created_at")]
-        public int Created_at { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Created_at { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("filename")]
-        public string Filename { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Filename { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("purpose")]
-        public string Purpose { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Purpose { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Status { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Status { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("status_details")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public object Status_details { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public object? Status_details { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static OpenAIFile FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<OpenAIFile>(data, options);
+
         }
 
     }
@@ -4999,53 +5902,111 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public string Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Id { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("created_at")]
-        public int Created_at { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Created_at { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("updated_at")]
-        public int Updated_at { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Updated_at { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("model")]
-        public string Model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Model { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("fine_tuned_model")]
-        public string Fine_tuned_model { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public string? Fine_tuned_model { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("organization_id")]
-        public string Organization_id { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Organization_id { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
-        public string Status { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Status { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("hyperparams")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public object Hyperparams { get; set; } = new object();
 
         [System.Text.Json.Serialization.JsonPropertyName("training_files")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<OpenAIFile> Training_files { get; set; } = new System.Collections.ObjectModel.Collection<OpenAIFile>();
 
         [System.Text.Json.Serialization.JsonPropertyName("validation_files")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<OpenAIFile> Validation_files { get; set; } = new System.Collections.ObjectModel.Collection<OpenAIFile>();
 
         [System.Text.Json.Serialization.JsonPropertyName("result_files")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<OpenAIFile> Result_files { get; set; } = new System.Collections.ObjectModel.Collection<OpenAIFile>();
 
         [System.Text.Json.Serialization.JsonPropertyName("events")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<FineTuneEvent> Events { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<FineTuneEvent>? Events { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static FineTune FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<FineTune>(data, options);
+
         }
 
     }
@@ -5055,24 +6016,60 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("created_at")]
-        public int Created_at { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Created_at { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("level")]
-        public string Level { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Level { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("message")]
-        public string Message { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Message { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static FineTuneEvent FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<FineTuneEvent>(data, options);
+
         }
 
     }
@@ -5083,31 +6080,56 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("text")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Text { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Text { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("index")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public int Index { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public int? Index { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("logprobs")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public Logprobs Logprobs { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public Logprobs? Logprobs { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("finish_reason")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Finish_reason { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Finish_reason { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Choices FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Choices>(data, options);
+
         }
 
     }
@@ -5117,21 +6139,52 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("prompt_tokens")]
-        public int Prompt_tokens { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Prompt_tokens { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("completion_tokens")]
-        public int Completion_tokens { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Completion_tokens { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("total_tokens")]
-        public int Total_tokens { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Total_tokens { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Usage FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Usage>(data, options);
+
         }
 
     }
@@ -5172,26 +6225,51 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("index")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public int Index { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public int? Index { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("message")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public ChatCompletionResponseMessage Message { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public ChatCompletionResponseMessage? Message { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("finish_reason")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Finish_reason { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Finish_reason { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Choices2 FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Choices2>(data, options);
+
         }
 
     }
@@ -5201,21 +6279,52 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("prompt_tokens")]
-        public int Prompt_tokens { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Prompt_tokens { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("completion_tokens")]
-        public int Completion_tokens { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Completion_tokens { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("total_tokens")]
-        public int Total_tokens { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Total_tokens { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Usage2 FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Usage2>(data, options);
+
         }
 
     }
@@ -5226,31 +6335,56 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("text")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Text { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Text { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("index")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public int Index { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public int? Index { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("logprobs")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public Logprobs2 Logprobs { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public Logprobs2? Logprobs { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("finish_reason")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Finish_reason { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Finish_reason { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Choices3 FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Choices3>(data, options);
+
         }
 
     }
@@ -5260,21 +6394,52 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("prompt_tokens")]
-        public int Prompt_tokens { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Prompt_tokens { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("completion_tokens")]
-        public int Completion_tokens { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Completion_tokens { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("total_tokens")]
-        public int Total_tokens { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Total_tokens { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Usage3 FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Usage3>(data, options);
+
         }
 
     }
@@ -5312,21 +6477,46 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("url")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Url { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Url { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("b64_json")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string B64_json { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? B64_json { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Data FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Data>(data, options);
+
         }
 
     }
@@ -5390,21 +6580,54 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("flagged")]
-        public bool Flagged { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public bool Flagged { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("categories")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public Categories Categories { get; set; } = new Categories();
 
         [System.Text.Json.Serialization.JsonPropertyName("category_scores")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public Category_scores Category_scores { get; set; } = new Category_scores();
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Results FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Results>(data, options);
+
         }
 
     }
@@ -5415,26 +6638,51 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Object { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("document")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public int Document { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public int? Document { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("score")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public double Score { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public double? Score { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Data2 FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Data2>(data, options);
+
         }
 
     }
@@ -5445,21 +6693,46 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("document")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public int Document { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public int? Document { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("text")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Text { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Text { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Selected_documents FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Selected_documents>(data, options);
+
         }
 
     }
@@ -5470,26 +6743,51 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("document")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public int Document { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public int? Document { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("text")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Text { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Text { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("label")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public string Label { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public string? Label { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Selected_examples FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Selected_examples>(data, options);
+
         }
 
     }
@@ -5499,21 +6797,54 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("index")]
-        public int Index { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Index { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("object")]
-        public string Object { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Object { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("embedding")]
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.ICollection<double> Embedding { get; set; } = new System.Collections.ObjectModel.Collection<double>();
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Data3 FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Data3>(data, options);
+
         }
 
     }
@@ -5523,18 +6854,47 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("prompt_tokens")]
-        public int Prompt_tokens { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Prompt_tokens { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("total_tokens")]
-        public int Total_tokens { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public int Total_tokens { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Usage4 FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Usage4>(data, options);
+
         }
 
     }
@@ -5545,31 +6905,56 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("tokens")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<string> Tokens { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<string>? Tokens { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("token_logprobs")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<double> Token_logprobs { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<double>? Token_logprobs { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("top_logprobs")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<object> Top_logprobs { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<object>? Top_logprobs { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("text_offset")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<int> Text_offset { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<int>? Text_offset { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Logprobs FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Logprobs>(data, options);
+
         }
 
     }
@@ -5580,31 +6965,56 @@ namespace OpenAI
 
         [System.Text.Json.Serialization.JsonPropertyName("tokens")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<string> Tokens { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<string>? Tokens { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("token_logprobs")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<double> Token_logprobs { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<double>? Token_logprobs { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("top_logprobs")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<object> Top_logprobs { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<object>? Top_logprobs { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("text_offset")]
 
-        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]   
-        public System.Collections.Generic.ICollection<int> Text_offset { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+        public System.Collections.Generic.ICollection<int>? Text_offset { get; set; } = default!;
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Logprobs2 FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Logprobs2>(data, options);
+
         }
 
     }
@@ -5614,33 +7024,72 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("hate")]
-        public bool Hate { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public bool Hate { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("hate/threatening")]
-        public bool Hate_threatening { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public bool Hate_threatening { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("self-harm")]
-        public bool SelfHarm { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public bool SelfHarm { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("sexual")]
-        public bool Sexual { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public bool Sexual { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("sexual/minors")]
-        public bool Sexual_minors { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public bool Sexual_minors { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("violence")]
-        public bool Violence { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public bool Violence { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("violence/graphic")]
-        public bool Violence_graphic { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public bool Violence_graphic { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Categories FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Categories>(data, options);
+
         }
 
     }
@@ -5650,33 +7099,72 @@ namespace OpenAI
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("hate")]
-        public double Hate { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public double Hate { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("hate/threatening")]
-        public double Hate_threatening { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public double Hate_threatening { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("self-harm")]
-        public double SelfHarm { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public double SelfHarm { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("sexual")]
-        public double Sexual { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public double Sexual { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("sexual/minors")]
-        public double Sexual_minors { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public double Sexual_minors { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("violence")]
-        public double Violence { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public double Violence { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("violence/graphic")]
-        public double Violence_graphic { get; set; }
 
-        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.Never)]
+        public double Violence_graphic { get; set; } = default!;
+
+        private System.Collections.Generic.IDictionary<string, object>? _additionalProperties;
 
         [System.Text.Json.Serialization.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
             set { _additionalProperties = value; }
+        }
+
+        public string ToJson()
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Serialize(this, options);
+
+        }
+        public static Category_scores FromJson(string data)
+        {
+
+            var options = new System.Text.Json.JsonSerializerOptions();
+
+            var converters = new System.Text.Json.Serialization.JsonConverter[] { new OpenAI.JsonStringEnumConverter() };
+            foreach(var converter in converters)
+                options.Converters.Add(converter);
+
+            return System.Text.Json.JsonSerializer.Deserialize<Category_scores>(data, options);
+
         }
 
     }
@@ -5688,11 +7176,11 @@ namespace OpenAI
     {
         public int StatusCode { get; private set; }
 
-        public string Response { get; private set; }
+        public string? Response { get; private set; }
 
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IEnumerable<string>> Headers { get; private set; }
 
-        public OpenAiApiException(string message, int statusCode, string response, System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IEnumerable<string>> headers, System.Exception innerException)
+        public OpenAiApiException(string message, int statusCode, string? response, System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IEnumerable<string>> headers, System.Exception? innerException)
             : base(message + "\n\nStatus: " + statusCode + "\nResponse: \n" + ((response == null) ? "(null)" : response.Substring(0, response.Length >= 512 ? 512 : response.Length)), innerException)
         {
             StatusCode = statusCode;
@@ -5711,7 +7199,7 @@ namespace OpenAI
     {
         public TResult Result { get; private set; }
 
-        public OpenAiApiException(string message, int statusCode, string response, System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IEnumerable<string>> headers, TResult result, System.Exception innerException)
+        public OpenAiApiException(string message, int statusCode, string? response, System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IEnumerable<string>> headers, TResult result, System.Exception? innerException)
             : base(message, statusCode, response, headers, innerException)
         {
             Result = result;

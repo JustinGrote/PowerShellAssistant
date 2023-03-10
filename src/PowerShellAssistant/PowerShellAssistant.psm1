@@ -6,10 +6,10 @@ using namespace System.Management.Automation
 
 $ErrorActionPreference = 'Stop'
 Add-Type -Path (Join-Path $PSScriptRoot '*.dll')
-$ErrorActionPreference = 'Stop'
 
-#This code based model is currently free
-$SCRIPT:aiDefaultModel = 'code-cushman-001'
+#This is the cheapest model for testing
+$SCRIPT:aiDefaultModel = 'ada'
+$SCRIPT:aiDefaultChatModel = 'gpt-3.5-turbo'
 
 #region Public
 function Connect-AI {
@@ -51,10 +51,12 @@ function Connect-AI {
 	}
 }
 
-function Get-AIModel {
+filter Get-AIModel {
 	[OutputType([OpenAI.Model])]
 	[CmdletBinding()]
 	param(
+		# The ID of the model to get. If not specified, returns all models.
+		[Parameter(ValueFromPipeline)][string]$Id,
 		[ValidateNotNullOrEmpty()][OpenAI.Client]$Client = $SCRIPT:aiClient
 	)
 	if (-not $Client) {
@@ -62,7 +64,11 @@ function Get-AIModel {
 		$Client = $SCRIPT:aiClient
 	}
 
-	$Client.ListModels()
+	if ($Id) {
+		return $Client.RetrieveModel($Id)
+	}
+
+	$Client.ListModels().Data
 }
 
 
@@ -72,22 +78,25 @@ function Get-AIEngine {
 	param(
 		[ValidateNotNullOrEmpty()][OpenAI.Client]$Client = $SCRIPT:aiClient
 	)
+	Write-Warning 'Engines are deprecated. Use Get-AIModel instead.'
 	if (-not $Client) {
 		Assert-Connected
 		$Client = $SCRIPT:aiClient
 	}
 
 	$Client.ListEngines()
+	| ConvertFrom-ListResponse
 }
 
 function Get-AICompletion {
 	[CmdletBinding()]
-	[OutputType([CompletionResult])]
+	[OutputType([OpenAI.CreateCompletionResponse])]
 	param(
 		[Parameter(Mandatory)]$Prompt,
-		[ValidateNotNullOrEmpty()]$Model = $SCRIPT:aiDefaultModel,
+		#The name of the model to use.
+		[ValidateSet([AvailableModels])][String]$Model = $SCRIPT:aiDefaultModel,
 		[ValidateNotNullOrEmpty()][OpenAI.Client]$Client = $SCRIPT:aiClient,
-		[ValidateNotNullOrEmpty()][uint]$MaxTokens = 4096,
+		[ValidateNotNullOrEmpty()][uint]$MaxTokens = 1000,
 		[ValidateNotNullOrEmpty()][uint]$Temperature = 0
 	)
 	if (-not $Client) {
@@ -99,15 +108,77 @@ function Get-AICompletion {
 		Prompt      = $Prompt
 		Stream      = $false
 		Model       = $Model
-		Max_tokens  = 64
-		Temperature = 0
+		Max_tokens  = $MaxTokens
+		Temperature = $Temperature
 	}
 	$Client.CreateCompletion($request)
+}
+
+function Get-AIChat {
+	[CmdletBinding()]
+	[OutputType([OpenAI.CreateChatCompletionResponse])]
+	param(
+		#Include one or more prompts to start the conversation
+		[Parameter(Mandatory)]
+		[string[]]$Prompt,
+
+		#Supply a previous chat session to add new responses to it
+		[OpenAI.CreateChatCompletionRequest]$ChatSession,
+
+		#Save the chat session to this variable, so you can add more responses to it later
+		[string]$SessionVariable,
+
+
+		#The name of the model to use.
+		[ValidateSet([AvailableModels])]
+		[String]$Model = $SCRIPT:aiDefaultChatModel,
+
+		[ValidateNotNullOrEmpty()]
+		[OpenAI.Client]$Client = $SCRIPT:aiClient,
+
+		[ValidateNotNullOrEmpty()]
+		[uint]$MaxTokens = 1000,
+
+		[ValidateNotNullOrEmpty()]
+		[uint]$Temperature = 0
+	)
+	if (-not $Client) {
+		Assert-Connected
+		$Client = $SCRIPT:aiClient
+	}
+
+	$ChatSession ??= [CreateChatCompletionRequest]@{
+		Messages    = [List[ChatCompletionRequestMessage]]@()
+		Stream      = $false
+		Model       = $Model
+		Max_tokens  = $MaxTokens
+		Temperature = $Temperature
+	}
+
+	foreach ($PromptItem in $Prompt) {
+		$ChatSession.Messages.Add(
+			[ChatCompletionRequestMessage]@{
+				Content = $PromptItem
+				#BUG: This is case sensitive in the API but NSWag generates it as uppercase
+				Role    = 'user'
+			}
+		)
+	}
+
+	$chatResponse = $Client.CreateChatCompletion($ChatSession)
+
+	if ($SessionVariable) {
+		#TODO: Implement Session Variable
+		throw [System.NotImplementedException]('NOT IMPLEMENTED: Needs to find which messages are new and add them to the session variable.')
+	}
+
+	return $chatResponse
 }
 #endregion Public
 
 #Region Private
 function New-AIClient {
+	[OutputType([OpenAI.Client])]
 	param(
 		[string]$ApiKey,
 		[Switch]$GithubCopilot
@@ -139,6 +210,14 @@ function Assert-Connected {
 		Connect-AI
 	}
 }
+
+#If the returned result was a list, return the actual data
+filter ConvertFrom-ListResponse {
+	if ($PSItem.Object -ne 'list') { return }
+	return $PSItem.Data
+}
+
+
 
 #endregion Private
 
@@ -244,133 +323,177 @@ function Assert-Connected {
 # 		[string[]]$chatPrompt,
 
 # 		#If you just want the result and don't want to be prompted for further replies, specify this
-		# 		[Switch]$NoReply,
+# 		[Switch]$NoReply,
 
-		# 		#By default, the latest code recommendation is copied to your clipboard, specify this to disable the behavior
-		# 		[switch]$NoClipboard,
+# 		#By default, the latest code recommendation is copied to your clipboard, specify this to disable the behavior
+# 		[switch]$NoClipboard,
 
-		# 		[ValidateNotNullOrEmpty()]
-		# 		#Specify a prompt that guides Chat how to behave. By default, it is told to prefer PowerShell as a language.
-		# 		[string]$SystemPrompt = 'PowerShell syntax and be brief',
+# 		[ValidateNotNullOrEmpty()]
+# 		#Specify a prompt that guides Chat how to behave. By default, it is told to prefer PowerShell as a language.
+# 		[string]$SystemPrompt = 'PowerShell syntax and be brief',
 
-		# 		#Maximum tokens to generate. Defaults to 500 to minimize accidental API billing
-		# 		[ValidateNotNullOrEmpty()]
-		# 		[uint]$MaxTokens = 500,
+# 		#Maximum tokens to generate. Defaults to 500 to minimize accidental API billing
+# 		[ValidateNotNullOrEmpty()]
+# 		[uint]$MaxTokens = 500,
 
-		# 		[ValidateNotNullOrEmpty()]
-		# 		[string]$Model = [Models]::ChatGpt3_5Turbo
-		# 		#TODO: Figure out how to autocomplete this
-		# 	)
-		# 	begin {
-		# 		$ErrorActionPreference = 'Stop'
-		# 		Assert-Connected
-		# 		[List[ChatMessage]]$chatHistory = @(
-		# 			[ChatMessage]::FromSystem($SystemPrompt)
-		# 		)
-		# 	}
-		# 	process {
-		# 		do {
-		# 			$chatPrompt ??= Read-Host -Prompt 'You'
-		# 			$chatHistory.Add(
-		# 				[ChatMessage]::FromUser($chatPrompt)
-		# 			)
-		# 			$request = [ChatCompletionCreateRequest]@{
-		# 				Messages  = $chatHistory
-		# 				MaxTokens = $MaxTokens
-		# 				Model     = $Model
-		# 			}
+# 		[ValidateNotNullOrEmpty()]
+# 		[string]$Model = [Models]::ChatGpt3_5Turbo
+# 		#TODO: Figure out how to autocomplete this
+# 	)
+# 	begin {
+# 		$ErrorActionPreference = 'Stop'
+# 		Assert-Connected
+# 		[List[ChatMessage]]$chatHistory = @(
+# 			[ChatMessage]::FromSystem($SystemPrompt)
+# 		)
+# 	}
+# 	process {
+# 		do {
+# 			$chatPrompt ??= Read-Host -Prompt 'You'
+# 			$chatHistory.Add(
+# 				[ChatMessage]::FromUser($chatPrompt)
+# 			)
+# 			$request = [ChatCompletionCreateRequest]@{
+# 				Messages  = $chatHistory
+# 				MaxTokens = $MaxTokens
+# 				Model     = $Model
+# 			}
 
-		# 			#TODO: Loop this and make it cancellable
-		# 			[ResponseModels.ChatCompletionCreateResponse]$response = $client.
-		# 			ChatCompletion.
-		# 			CreateCompletion($request).
-		# 			GetAwaiter().
-		# 			GetResult()
+# 			#TODO: Loop this and make it cancellable
+# 			[ResponseModels.ChatCompletionCreateResponse]$response = $client.
+# 			ChatCompletion.
+# 			CreateCompletion($request).
+# 			GetAwaiter().
+# 			GetResult()
 
-		# 			if (-not $response.Successful) {
-		# 				$errCode = $response.Error.Code ?? 'UNKNOWN'
-		# 				$errMsg = $response.Error.Message ?? 'Unknown error'
-		# 				Write-Error "$errCode - $errMsg"
-		# 				return
-		# 			}
+# 			if (-not $response.Successful) {
+# 				$errCode = $response.Error.Code ?? 'UNKNOWN'
+# 				$errMsg = $response.Error.Message ?? 'Unknown error'
+# 				Write-Error "$errCode - $errMsg"
+# 				return
+# 			}
 
-		# 			$aiResponse = $response.Choices[0] ?? { throw new Exception('No response from AI. This is a probably a bug you should report.') }
+# 			$aiResponse = $response.Choices[0] ?? { throw new Exception('No response from AI. This is a probably a bug you should report.') }
 
-		# 			[string]$responseMessage = $aiResponse.Message.Content
+# 			[string]$responseMessage = $aiResponse.Message.Content
 
-		# 			$chatHistory.Add(
-		# 				[ChatMessage]::FromAssistance($responseMessage)
-		# 			)
+# 			$chatHistory.Add(
+# 				[ChatMessage]::FromAssistance($responseMessage)
+# 			)
 
-		# 			$responseMessage
-		# 			| Convert-ChatCodeToClipboard
-		# 			| Format-ChatCode
-		# 			| Write-Host -Fore DarkGray
+# 			$responseMessage
+# 			| Convert-ChatCodeToClipboard
+# 			| Format-ChatCode
+# 			| Write-Host -Fore DarkGray
 
-		# 			#Handle various bugs that might occur
-		# 			if ($aiResponse.Message.Role -ne 'assistant') {
-		# 				Write-Warning 'Chat response was not from the assistant. This is a probably a bug you should report.'
-		# 			}
+# 			#Handle various bugs that might occur
+# 			if ($aiResponse.Message.Role -ne 'assistant') {
+# 				Write-Warning 'Chat response was not from the assistant. This is a probably a bug you should report.'
+# 			}
 
-		# 			switch ($aiResponse.FinishReason) {
-		# 				'stop' {} #This is the normal response
-		# 				'length' {
-		# 					Write-Warning "$MaxTokens tokens reached. Consider increasing the value of -MaxTokens for longer responses."
-		# 				}
-		# 				$null {
-		# 					Write-Debug 'Null FinishReason received. This seems to occur on occasion and may or may not be a bug.'
-		# 				}
-		# 				default {
-		# 					Write-Warning "Chat response finished abruply due to: $($aiResponse.FinishReason)"
-		# 				}
-		# 			}
+# 			switch ($aiResponse.FinishReason) {
+# 				'stop' {} #This is the normal response
+# 				'length' {
+# 					Write-Warning "$MaxTokens tokens reached. Consider increasing the value of -MaxTokens for longer responses."
+# 				}
+# 				$null {
+# 					Write-Debug 'Null FinishReason received. This seems to occur on occasion and may or may not be a bug.'
+# 				}
+# 				default {
+# 					Write-Warning "Chat response finished abruply due to: $($aiResponse.FinishReason)"
+# 				}
+# 			}
 
-		# 			$chatPrompt = $null
-		# 			if (-not $NoReply) {
-		# 				Write-Host -Fore Cyan '<Ctrl-C to exit>'
-		# 			}
-		# 		} while (
-		# 			-not $NoReply
-		# 		)
-		# 	}
-		# }
+# 			$chatPrompt = $null
+# 			if (-not $NoReply) {
+# 				Write-Host -Fore Cyan '<Ctrl-C to exit>'
+# 			}
+# 		} while (
+# 			-not $NoReply
+# 		)
+# 	}
+# }
 
-		# filter Format-ChatCode {
-		# 	<#
-		# 	.SYNOPSIS
-		# 	Given a string, for any occurance of text surrounded by backticks, replace the backticks with ANSI escape codes
-		# 	#>
-		# 	$codeBlockRegex = '(?s)```[\r|\n|powershell]+(.+?)```'
-		# 	$codeSnippetRegex = '(?s)`(.+?)`'
-		# 	$boldSelectedText = ($PSStyle.Bold + '$1' + $PSStyle.BoldOff)
-		# 	$PSItem -replace $codeBlockRegex, $boldSelectedText -replace $codeSnippetRegex, $boldSelectedText
-		# }
 
-		# filter Convert-ChatCodeToClipboard {
-		# 	<#
-		# 	.SYNOPSIS
-		# 	Given a string, take the last occurance of text surrounded by a fenced code block, and copy it to the clipboard.
-		# 	It will also pass through the string for further filtering
-		# 	#>
-		# 	$fencedCodeBlockRegex = '(?s)```[\r|\n|powershell]+(.+?)```'
-		# 	$matchResult = $PSItem -match $fencedCodeBlockRegex
-		# 	$savedMatches = $matches
-		# 	$cbMatch = $savedMatches.($savedMatches.Keys | Sort-Object | Select-Object -Last 1)
-		# 	if (-not $matchResult) {
-		# 		Write-Debug 'No code block detected, skipping this step'
-		# 		return $PSItem
-		# 	}
 
-		# 	Write-Debug "Copying last suggested code block to clipboard:`n$cbMatch"
-		# 	Set-Clipboard -Value $cbMatch
+# filter Convert-ChatCodeToClipboard {
+# 	<#
+# 	.SYNOPSIS
+# 	Given a string, take the last occurance of text surrounded by a fenced code block, and copy it to the clipboard.
+# 	It will also pass through the string for further filtering
+# 	#>
+# 	$fencedCodeBlockRegex = '(?s)```[\r|\n|powershell]+(.+?)```'
+# 	$matchResult = $PSItem -match $fencedCodeBlockRegex
+# 	$savedMatches = $matches
+# 	$cbMatch = $savedMatches.($savedMatches.Keys | Sort-Object | Select-Object -Last 1)
+# 	if (-not $matchResult) {
+# 		Write-Debug 'No code block detected, skipping this step'
+# 		return $PSItem
+# 	}
 
-		# 	return $PSItem
-		# }
+# 	Write-Debug "Copying last suggested code block to clipboard:`n$cbMatch"
+# 	Set-Clipboard -Value $cbMatch
 
-		# filter Debug-APICost {
-		# 	<#
-		# 	.SYNOPSIS
-		# 	Parses the API info and calculates the approximate cost of the query.
-		# 	#>
-		# 	Write-Debug 'This query took 30 minutescls'
-		# }
+# 	return $PSItem
+# }
+
+# filter Debug-APICost {
+# 	<#
+# 	.SYNOPSIS
+# 	Parses the API info and calculates the approximate cost of the query.
+# 	#>
+# 	Write-Debug 'This query took 30 minutescls'
+# }
+
+class AvailableModels : IValidateSetValuesGenerator {
+	[String[]] GetValidValues() {
+		$models = Get-AIModel
+		return $models.Id
+	}
+}
+
+filter Format-ChatCode {
+	<#
+	.SYNOPSIS
+	Given a string, for any occurance of text surrounded by backticks, replace the backticks with ANSI escape codes
+	#>
+	$codeBlockRegex = '(?s)```[\r|\n|powershell]+(.+?)```'
+	$codeSnippetRegex = '(?s)`(.+?)`'
+	$boldSelectedText = ($PSStyle.Italic + '$1' + $PSStyle.ItalicOff)
+	$PSItem -replace $codeBlockRegex, $boldSelectedText -replace $codeSnippetRegex, $boldSelectedText
+}
+
+function Format-ChatCompletionResponseMessage {
+	param(
+		[OpenAI.ChatCompletionResponseMessage]$message
+	)
+
+	$role = $message.Role
+	$roleColor = switch ($role) {
+		'Assistant' { 'Green' }
+		'User' { 'DarkCyan' }
+		default { 'DarkGray' }
+	}
+	$formattedMessage = $message.Content.Trim() | Format-ChatCode
+	"$($PSStyle.Foreground.$roleColor)$role`:$($PSStyle.Reset) $($PSStyle.ForeGround.BrightBlack)$formattedMessage"
+}
+
+function Format-Choices2 {
+	param(
+		[Choices2]$choice
+	)
+	$PSStyle.Foreground.BrightCyan +
+	"Choice $([int]$choice.Index + 1): " +
+	(Format-ChatCompletionResponseMessage $choice.Message)
+}
+
+function Format-CreateChatCompletionResponse {
+	param(
+		[OpenAI.CreateChatCompletionResponse]$response
+	)
+	if ($response.Choices.Count -eq 1) {
+		Format-ChatCompletionResponseMessage $response.Choices[0].Message
+	} else {
+		$Response.Choices
+	}
+}
