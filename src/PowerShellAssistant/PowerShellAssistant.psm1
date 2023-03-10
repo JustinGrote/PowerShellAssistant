@@ -13,7 +13,7 @@ if (Test-Path "$PSScriptRoot/bin/Debug/net7.0") {
 	Add-Type -Path $PSScriptRoot/*.dll
 }
 
-#These are the cheapest models for testing
+#These are the cheapest models for testing, opt into more powerful models
 $SCRIPT:aiDefaultModel = 'ada'
 $SCRIPT:aiDefaultChatModel = 'gpt-3.5-turbo'
 
@@ -170,7 +170,8 @@ function Get-AIChat {
 	$chatResponse = $Client.CreateChatCompletion($ChatSession)
 
 	$price = Get-UsagePrice -Model $chatResponse.Model -Total $chatResponse.Usage.Total_tokens
-	Write-Verbose "Chat usage - $($chatResponse.Usage) [Cost: $price] for Id $($chatResponse.Id)"
+
+	Write-Verbose "Chat usage - $($chatResponse.Usage) $($price ? "$price " : $null)for Id $($chatResponse.Id)"
 
 	if ($SessionVariable) {
 		$ChatSession.Messages.Add($chatResponse.Choices.Message)
@@ -344,6 +345,7 @@ function Get-Chat {
 		[ValidateNotNullOrEmpty()]
 		[uint]$MaxTokens = 500,
 
+		[ValidateSet([AvailableModels])]
 		[string]$Model
 		#TODO: Figure out how to autocomplete this
 	)
@@ -380,6 +382,12 @@ function Get-Chat {
 
 			$result
 
+			if (-not $NoClipboard) {
+				$result.Choices[0].Message.Content
+				| Convert-ChatCodeToClipboard
+				| Out-Null
+			}
+
 			#TODO: Move this into the formatter
 			# switch ($aiResponse.FinishReason) {
 			# 	'stop' {} #This is the normal response
@@ -404,39 +412,30 @@ function Get-Chat {
 	}
 }
 
+filter Convert-ChatCodeToClipboard {
+	<#
+	.SYNOPSIS
+	Given a string, take the last occurance of text surrounded by a fenced code block, and copy it to the clipboard.
+	It will also pass through the string for further filtering
+	#>
+	$fencedCodeBlockRegex = '(?s)```[\r|\n|powershell]+(.+?)```'
+	$matchResult = $PSItem -match $fencedCodeBlockRegex
+	$savedMatches = $matches
+	$cbMatch = $savedMatches.($savedMatches.Keys | Sort-Object | Select-Object -Last 1)
+	if (-not $matchResult) {
+		Write-Debug 'No code block detected, skipping this step'
+		return $PSItem
+	}
 
+	Write-Debug "Copying last suggested code block to clipboard:`n$cbMatch"
+	Set-Clipboard -Value $cbMatch
 
-# filter Convert-ChatCodeToClipboard {
-# 	<#
-# 	.SYNOPSIS
-# 	Given a string, take the last occurance of text surrounded by a fenced code block, and copy it to the clipboard.
-# 	It will also pass through the string for further filtering
-# 	#>
-# 	$fencedCodeBlockRegex = '(?s)```[\r|\n|powershell]+(.+?)```'
-# 	$matchResult = $PSItem -match $fencedCodeBlockRegex
-# 	$savedMatches = $matches
-# 	$cbMatch = $savedMatches.($savedMatches.Keys | Sort-Object | Select-Object -Last 1)
-# 	if (-not $matchResult) {v
-# 		Write-Debug 'No code block detected, skipping this step'
-# 		return $PSItem
-# 	}
-
-# 	Write-Debug "Copying last suggested code block to clipboard:`n$cbMatch"
-# 	Set-Clipboard -Value $cbMatch
-
-# 	return $PSItem
-# }
-
-# filter Debug-APICost {
-# 	<#
-# 	.SYNOPSIS
-# 	Parses the API info and calculates the approximate cost of the query.
-# 	#>
-# 	Write-Debug 'This query took 30 minutescls'
-# }
+	return $PSItem
+}
 
 class AvailableModels : IValidateSetValuesGenerator {
 	[String[]] GetValidValues() {
+		trap { Write-Host ''; Write-Host -NoNewline -ForegroundColor Red "Validation Error: $PSItem" }
 		$models = Get-AIModel
 		return $models.Id
 	}
@@ -513,7 +512,8 @@ function Get-UsagePrice {
 		}
 	}
 
-	Write-Error "No Matching Pricing model found for model $Model"
+	#Return an empty string if no pricing engine found.
+	return [string]::Empty
 
 }
 
