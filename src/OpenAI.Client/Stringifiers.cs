@@ -1,24 +1,5 @@
 namespace OpenAI;
 
-public partial class ChatCompletionRequestMessage
-{
-	public ChatCompletionRequestMessage() { }
-
-	public ChatCompletionRequestMessage(ChatCompletionResponseMessage responseMessage)
-	{
-		Content = responseMessage.Content;
-		Role = Enum.Parse<ChatCompletionRequestMessageRole>(responseMessage.Role.ToString());
-	}
-
-	public ChatCompletionRequestMessage(string userMessage) : this(userMessage, ChatCompletionRequestMessageRole.User) { }
-
-	public ChatCompletionRequestMessage(string userMessage, ChatCompletionRequestMessageRole role = ChatCompletionRequestMessageRole.User)
-	{
-		Role = role;
-		Content = userMessage;
-	}
-}
-
 public partial class Usage
 {
 	public static string ToUsageString(int total, int prompt, int? completion)
@@ -52,5 +33,23 @@ public partial class Usage4
 	public override string ToString()
 	{
 		return Usage.ToUsageString(Total_tokens, Prompt_tokens, null);
+	}
+}
+
+public partial class ChatCompletionRequestMessage
+{
+	public override string ToString()
+	{
+		return $"{Role}: {Content}";
+	}
+}
+
+public partial class Choices2
+{
+	public override string ToString()
+	{
+		return Index.HasValue
+			? $"Choice {Index + 1} - {Message?.Role}: {Message?.Content}"
+			: $"{Message?.Role}: {Message?.Content}";
 	}
 }

@@ -6,8 +6,9 @@ using namespace System.Management.Automation
 
 $ErrorActionPreference = 'Stop'
 #TODO: This should be better
-$debugBinPath = Join-Path $PSScriptRoot '/bin/Debug/net7.0'
-if (Test-Path "$PSScriptRoot/bin/Debug/net7.0") {
+$debugBinPath = Join-Path $PSScriptRoot '/bin/Debug/net6.0'
+if (Test-Path $debugBinPath) {
+	Write-Warning "Debug build detected. Using assemblies at $debugBinPath"
 	Add-Type -Path $debugBinPath/*.dll
 } else {
 	Add-Type -Path $PSScriptRoot/*.dll
@@ -16,6 +17,7 @@ if (Test-Path "$PSScriptRoot/bin/Debug/net7.0") {
 #These are the cheapest models for testing, opt into more powerful models
 $SCRIPT:aiDefaultModel = 'ada'
 $SCRIPT:aiDefaultChatModel = 'gpt-3.5-turbo'
+$SCRIPT:aiDefaultCodeModel = 'code-davinci-002'
 
 #region Public
 function Connect-AI {
@@ -121,15 +123,46 @@ function Get-AICompletion {
 	$Client.CreateCompletion($request)
 }
 
-function Get-AIChat {
+function Get-AICode {
+	<#
+	.SYNOPSIS
+	Utilizes the Codex models to fetch a code completion given a prompt.
+	.LINK
+	https://platform.openai.com/docs/guides/code/introduction
+	#>
+	[OutputType([OpenAI.CreateCompletionResponse])]
 	[CmdletBinding()]
+	param(
+		[string[]]$Prompt,
+		#The name of the model to use.
+		$Language = 'PowerShell 7',
+		[ValidateSet([AvailableModels])][String]$Model = $SCRIPT:aiDefaultCodeModel,
+		[ValidateNotNullOrEmpty()][OpenAI.Client]$Client = $SCRIPT:aiClient,
+		[ValidateNotNullOrEmpty()][uint]$MaxTokens = 1000,
+		[ValidateNotNullOrEmpty()][uint]$Temperature = 0
+	)
+	if (-not $Client) {
+		Assert-Connected
+		$Client = $SCRIPT:aiClient
+	}
+
+	#Add a language specifier to the prompt
+	$Prompt.Insert(0, "#$Language")
+
+	Get-AICompletion -Prompt $Prompt -Model $Model -MaxTokens $MaxTokens -Temperature $Temperature
+}
+
+function Get-AIChat {
 	[OutputType([OpenAI.CreateChatCompletionResponse])]
+	[CmdletBinding(DefaultParameterSetName = 'Prompt')]
 	param(
 		#Include one or more prompts to start the conversation
-		[Parameter(Mandatory)]
+		[Parameter(Mandatory, Position = 0, ValueFromPipeline, ParameterSetName = 'Prompt')]
+		[Parameter(ParameterSetName = 'ChatSession')]
 		[OpenAI.ChatCompletionRequestMessage[]]$Prompt,
 
 		#Supply a previous chat session to add new responses to it
+		[Parameter(Mandatory, ValueFromPipeline, ParameterSetName = 'ChatSession')]
 		[OpenAI.CreateChatCompletionRequest]$ChatSession,
 
 		#Save the chat session to this variable, so you can add more responses to it later
@@ -175,8 +208,7 @@ function Get-AIChat {
 
 	if ($SessionVariable) {
 		$ChatSession.Messages.Add($chatResponse.Choices.Message)
-		#TODO: Implement Session Variable
-		throw [System.NotImplementedException]('NOT IMPLEMENTED: Needs to find which messages are new and add them to the session variable.')
+		Set-Variable -Name $SessionVariable -Value $ChatSession -Scope Global -Force
 	}
 
 	return $chatResponse
@@ -427,7 +459,7 @@ filter Convert-ChatCodeToClipboard {
 		return $PSItem
 	}
 
-	Write-Debug "Copying last suggested code block to clipboard:`n$cbMatch"
+	Write-Verbose "Copying last suggested code block to clipboard:`n$cbMatch"
 	Set-Clipboard -Value $cbMatch
 
 	return $PSItem
@@ -495,6 +527,7 @@ function Get-UsagePrice {
 
 	#Taken from: https://openai.com/pricing
 	$pricePerToken = @{
+		'code'          = 0
 		'gpt-3.5-turbo' = .002 / 1000
 		'ada'           = .0004 / 1000
 		'babbage'       = .0005 / 1000

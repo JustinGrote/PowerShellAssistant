@@ -5,6 +5,9 @@ using System.Runtime.Serialization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+/// <summary>
+/// This custom enum converter supports custom name serialization using either the JsonPropertyName or EnumMember attributes. Required because System.Text.JSON doesn't support custom enum names.
+/// </summary>
 public class JsonStringEnumConverter : JsonConverterFactory
 {
 	public override bool CanConvert(Type typeToConvert)
