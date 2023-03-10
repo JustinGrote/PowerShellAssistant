@@ -163,6 +163,7 @@ function Get-AIChat {
 
 		#Supply a previous chat session to add new responses to it
 		[Parameter(Mandatory, ValueFromPipeline, ParameterSetName = 'ChatSession')]
+		[Parameter(ParameterSetName = 'Prompt')]
 		[OpenAI.CreateChatCompletionRequest]$ChatSession,
 
 		#Save the chat session to this variable, so you can add more responses to it later
