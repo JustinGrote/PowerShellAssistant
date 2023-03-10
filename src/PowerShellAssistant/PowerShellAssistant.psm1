@@ -5,9 +5,13 @@ using namespace System.Collections.Generic
 using namespace System.Management.Automation
 
 $ErrorActionPreference = 'Stop'
-Add-Type -Path (Join-Path $PSScriptRoot '*.dll')
+#TODO: This should be better
+$debugBinPath = Join-Path $PSScriptRoot '/bin/Debug/net7.0'
+if (Test-Path "$PSScriptRoot/bin/Debug/net7.0") {
+	Add-Type -Path $debugBinPath/*.dll
+}
 
-#This is the cheapest model for testing
+#These are the cheapest models for testing
 $SCRIPT:aiDefaultModel = 'ada'
 $SCRIPT:aiDefaultChatModel = 'gpt-3.5-turbo'
 
@@ -40,9 +44,11 @@ function Connect-AI {
 		$APIKey = $env:OPENAI_API_KEY
 	}
 
-	$client = New-AIClient @newAIClientParams -APIKey $APIKey
+	$client = New-AIClient @newAIClientParams -APIKey $APIKey -GithubCopilot:$GitHubCopilot
 
-	if (-not $NoDefault) {
+	if ($NoDefault) {
+		$PassThru = $true
+	} else {
 		$SCRIPT:aiClient = $client
 	}
 
@@ -70,7 +76,6 @@ filter Get-AIModel {
 
 	$Client.ListModels().Data
 }
-
 
 function Get-AIEngine {
 	[OutputType([OpenAI.Engine])]
@@ -300,21 +305,21 @@ filter ConvertFrom-ListResponse {
 # 	if (-not $SCRIPT:client) { Connect-Assistant }
 # }
 
-# function Update-GitHubCopilotToken {
-# 	<#
-# 	.SYNOPSIS
-# 	Fetches the latest token for GitHub Copilot
-# 	#>
-# 	param(
-# 		[ValidateNotNullOrEmpty()]
-# 		$GitHubToken = $SCRIPT:GHCopilotToken
-# 	)
-# 	$ErrorActionPreference = 'Stop'
-# 	$response = Invoke-RestMethod 'https://api.github.com/copilot_internal/v2/token' -Headers @{
-# 		Authorization = "token $($GitHubToken.trim())"
-# 	}
-# 	return $response.token
-# }
+function Update-GitHubCopilotToken {
+	<#
+	.SYNOPSIS
+	Fetches the latest token for GitHub Copilot
+	#>
+	param(
+		[ValidateNotNullOrEmpty()]
+		$GitHubToken = $SCRIPT:GHCopilotToken
+	)
+	$ErrorActionPreference = 'Stop'
+	$response = Invoke-RestMethod 'https://api.github.com/copilot_internal/v2/token' -Headers @{
+		Authorization = "token $($GitHubToken.trim())"
+	}
+	return $response.token
+}
 
 # function Get-Chat {
 # 	[CmdletBinding()]
