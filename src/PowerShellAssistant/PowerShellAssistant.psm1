@@ -19,6 +19,7 @@ $SCRIPT:aiDefaultModel = 'ada'
 $SCRIPT:aiDefaultChatModel = 'gpt-3.5-turbo'
 $SCRIPT:aiDefaultCodeModel = 'code-davinci-002'
 
+
 #region Public
 function Connect-AI {
 	[CmdletBinding()]
@@ -153,7 +154,7 @@ function Get-AICode {
 }
 
 function Get-AIChat {
-	[OutputType([OpenAI.CreateChatCompletionResponse])]
+	[OutputType([OpenAI.ChatConversation])]
 	[CmdletBinding(DefaultParameterSetName = 'Prompt')]
 	param(
 		#Include one or more prompts to start the conversation
@@ -164,10 +165,7 @@ function Get-AIChat {
 		#Supply a previous chat session to add new responses to it
 		[Parameter(Mandatory, ValueFromPipeline, ParameterSetName = 'ChatSession')]
 		[Parameter(ParameterSetName = 'Prompt')]
-		[OpenAI.CreateChatCompletionRequest]$ChatSession,
-
-		#Save the chat session to this variable, so you can add more responses to it later
-		[string]$SessionVariable,
+		[OpenAI.ChatConversation]$ChatSession,
 
 		#The name of the model to use.
 		[ValidateSet([AvailableModels])]
@@ -187,32 +185,41 @@ function Get-AIChat {
 		$Client = $SCRIPT:aiClient
 	}
 
-	$ChatSession ??= [CreateChatCompletionRequest]@{
-		Messages    = [List[ChatCompletionRequestMessage]]@()
-		Stream      = $false
-		Model       = $Model
-		Max_tokens  = $MaxTokens
-		Temperature = $Temperature
+	$ChatSession ??= [ChatConversation]@{
+		Request = @{
+			Messages    = [List[ChatCompletionRequestMessage]]@()
+			Stream      = $false
+			Model       = $Model
+			Max_tokens  = $MaxTokens
+			Temperature = $Temperature
+		}
+	}
+
+	#Append any response to the initial request. This is the continuation of a chat.
+	$responseChoices = $ChatSession.Response.Choices
+	$requestMessages = $ChatSession.Request.Messages
+	if ($responseChoices.Count -gt 0) {
+		if ($responseChoices.count -gt 1) {
+			Write-Error 'The previous chat response contained more than one choice. Continuing a conversation with multiple choices is not supported.' -Category 'NotImplemented'
+			return
+		}
+		$requestMessages.Add($responseChoices[0].Message)
 	}
 
 	foreach ($PromptItem in $Prompt) {
-		$ChatSession.Messages.Add(
+		$requestMessages.Add(
 			$PromptItem
 		)
 	}
 
-	$chatResponse = $Client.CreateChatCompletion($ChatSession)
+	$chatResponse = $Client.CreateChatCompletion($ChatSession.Request)
+	$chatSession.Response = $chatResponse
 
 	$price = Get-UsagePrice -Model $chatResponse.Model -Total $chatResponse.Usage.Total_tokens
 
 	Write-Verbose "Chat usage - $($chatResponse.Usage) $($price ? "$price " : $null)for Id $($chatResponse.Id)"
 
-	if ($SessionVariable) {
-		$ChatSession.Messages.Add($chatResponse.Choices.Message)
-		Set-Variable -Name $SessionVariable -Value $ChatSession -Scope Global -Force
-	}
-
-	return $chatResponse
+	return $chatSession
 }
 #endregion Public
 
@@ -413,10 +420,10 @@ function Get-Chat {
 				$chatHistory.Add([ChatCompletionRequestMessage]$message)
 			}
 
-			$result
+			Write-Output $result.Response
 
 			if (-not $NoClipboard) {
-				$result.Choices[0].Message.Content
+				$result.Response.Choices[0].Message.Content
 				| Convert-ChatCodeToClipboard
 				| Out-Null
 			}
@@ -485,13 +492,14 @@ filter Format-ChatCode {
 	$PSItem -replace $codeBlockRegex, $boldSelectedText -replace $codeSnippetRegex, $boldSelectedText
 }
 
-function Format-ChatCompletionResponseMessage {
+filter Format-ChatMessage {
 	param(
-		[OpenAI.ChatCompletionResponseMessage]$message
+		[Parameter(ValueFromPipeline)][ChatMessage]$message
 	)
 
 	$role = $message.Role
 	$roleColor = switch ($role) {
+		'System' { 'DarkYellow' }
 		'Assistant' { 'Green' }
 		'User' { 'DarkCyan' }
 		default { 'DarkGray' }
@@ -506,18 +514,35 @@ function Format-Choices2 {
 	)
 	$PSStyle.Foreground.BrightCyan +
 	"Choice $([int]$choice.Index + 1): " +
-	(Format-ChatCompletionResponseMessage $choice.Message)
+	(Format-ChatMessage $choice.Message)
 }
 
-function Format-CreateChatCompletionResponse {
+filter Format-CreateChatCompletionRequest {
 	param(
-		[OpenAI.CreateChatCompletionResponse]$response
+		[Parameter(ValueFromPipeline)][CreateChatCompletionRequest]$request
+	)
+	$request.messages | Format-ChatMessage
+}
+filter Format-CreateChatCompletionResponse {
+	param(
+		[Parameter(ValueFromPipeline)][CreateChatCompletionResponse]$response
 	)
 	if ($response.Choices.Count -eq 1) {
-		Format-ChatCompletionResponseMessage $response.Choices[0].Message
+		Format-ChatMessage $response.Choices[0].Message
 	} else {
 		$Response.Choices
 	}
+}
+
+function Format-ChatConversation {
+	param(
+		[ChatConversation]$conversation
+	)
+	$messages = @()
+
+	$messages += $conversation.Request | Format-CreateChatCompletionRequest
+	$messages += $conversation.Response | Format-CreateChatCompletionResponse
+	return $messages -join ($PSStyle.Reset + [Environment]::NewLine)
 }
 
 function Get-UsagePrice {

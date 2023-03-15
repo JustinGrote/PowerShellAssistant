@@ -1,0 +1,2 @@
+[*.cs]
+dotnet_naming_style.interface.required_prefix = none
