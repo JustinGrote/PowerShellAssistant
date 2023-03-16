@@ -2,7 +2,7 @@
 
 This module provides support for the OpenAI API and tools to leverage it including a chat client and PSReadline completer.
 
-Requires Powershell 7.3 due to usage of the new Generic Method syntax: https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_calling_generic_methods?view=powershell-7.3
+Requires Powershell 7.3 due to some .NET 7 feature usage.
 
 ## Code Generation
 
