@@ -6,7 +6,7 @@ using namespace System.Management.Automation
 
 $ErrorActionPreference = 'Stop'
 #TODO: This should be better
-$debugBinPath = Join-Path $PSScriptRoot '/bin/Debug/net6.0'
+$debugBinPath = Join-Path $PSScriptRoot '/bin/Debug/net7.0'
 if (Test-Path $debugBinPath) {
 	Write-Warning "Debug build detected. Using assemblies at $debugBinPath"
 	Add-Type -Path $debugBinPath/*.dll
@@ -178,7 +178,10 @@ function Get-AIChat {
 		[uint]$MaxTokens = 1000,
 
 		[ValidateNotNullOrEmpty()]
-		[uint]$Temperature = 0
+		[uint]$Temperature = 0,
+
+		#Stream the response. You will lose syntax highlighting and usage info.
+		[switch]$Stream
 	)
 	if (-not $Client) {
 		Assert-Connected
@@ -212,14 +215,24 @@ function Get-AIChat {
 		)
 	}
 
+	if ($Stream) {
+		$Client.CreateChatCompletionAsStream($ChatSession.Request)
+		| ForEach-Object {
+			Write-Host -NoNewline $PSItem.Choices[0].Delta.Content
+		}
+		Write-Host
+		return
+	}
+
 	$chatResponse = $Client.CreateChatCompletion($ChatSession.Request)
 	$chatSession.Response = $chatResponse
 
 	$price = Get-UsagePrice -Model $chatResponse.Model -Total $chatResponse.Usage.Total_tokens
 
 	Write-Verbose "Chat usage - $($chatResponse.Usage) $($price ? "$price " : $null)for Id $($chatResponse.Id)"
-
 	return $chatSession
+
+	#Stream the response
 }
 #endregion Public
 
@@ -387,6 +400,7 @@ function Get-Chat {
 
 		[ValidateSet([AvailableModels])]
 		[string]$Model
+
 		#TODO: Figure out how to autocomplete this
 	)
 	begin {
@@ -494,18 +508,39 @@ filter Format-ChatCode {
 
 filter Format-ChatMessage {
 	param(
-		[Parameter(ValueFromPipeline)][ChatMessage]$message
+		[Parameter(ValueFromPipeline)]$message,
+		#Notes that the content should be streamed rather than returned line by line
+		[switch]$Stream
 	)
 
 	$role = $message.Role
+	$content = $message.Content
+
 	$roleColor = switch ($role) {
 		'System' { 'DarkYellow' }
 		'Assistant' { 'Green' }
 		'User' { 'DarkCyan' }
 		default { 'DarkGray' }
 	}
-	$formattedMessage = $message.Content.Trim() | Format-ChatCode
-	"$($PSStyle.Foreground.$roleColor)$role`:$($PSStyle.Reset) $($PSStyle.ForeGround.BrightBlack)$formattedMessage"
+	$formattedMessage = $content.Trim() | Format-ChatCode
+	if (-not $Stream) {
+		return "$($PSStyle.Foreground.$roleColor)$role`:$($PSStyle.Reset) $($PSStyle.ForeGround.BrightBlack)$formattedMessage"
+	}
+
+	if ($role) {
+		[console]::Write('a')
+		# [Console]::Write("$($PSStyle.Foreground.$roleColor)$role`:$($PSStyle.Reset) ")
+	} elseif ($content) {
+		[console]::Write('b')
+		# [Console]::Write("$($PSStyle.ForeGround.BrightBlack)$content$($PSStyle.Reset)")
+	}
+}
+
+function Format-CreateChatCompletionChunkedResponse {
+	param(
+		[Parameter(ValueFromPipeline)][CreateChatCompletionChunkedResponse]$response
+	)
+	Format-ChatMessage -Stream $response.Choices[0].Delta
 }
 
 function Format-Choices2 {
