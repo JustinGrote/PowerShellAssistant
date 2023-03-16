@@ -6,7 +6,7 @@ using namespace System.Management.Automation
 
 $ErrorActionPreference = 'Stop'
 #TODO: This should be better
-$debugBinPath = Join-Path $PSScriptRoot '/bin/Debug/net6.0'
+$debugBinPath = Join-Path $PSScriptRoot '/bin/Debug/net7.0'
 if (Test-Path $debugBinPath) {
 	Write-Warning "Debug build detected. Using assemblies at $debugBinPath"
 	Add-Type -Path $debugBinPath/*.dll
@@ -178,7 +178,10 @@ function Get-AIChat {
 		[uint]$MaxTokens = 1000,
 
 		[ValidateNotNullOrEmpty()]
-		[uint]$Temperature = 0
+		[uint]$Temperature = 0,
+
+		#Do not stream the response. Syntax highlighting and usage costs will be enabled if you choose this.
+		[switch]$NoStream
 	)
 	if (-not $Client) {
 		Assert-Connected
@@ -212,14 +215,18 @@ function Get-AIChat {
 		)
 	}
 
-	$chatResponse = $Client.CreateChatCompletion($ChatSession.Request)
-	$chatSession.Response = $chatResponse
+	if ($NoStream) {
+		$chatResponse = $Client.CreateChatCompletion($ChatSession.Request)
+		$chatSession.Response = $chatResponse
 
-	$price = Get-UsagePrice -Model $chatResponse.Model -Total $chatResponse.Usage.Total_tokens
+		$price = Get-UsagePrice -Model $chatResponse.Model -Total $chatResponse.Usage.Total_tokens
 
-	Write-Verbose "Chat usage - $($chatResponse.Usage) $($price ? "$price " : $null)for Id $($chatResponse.Id)"
+		Write-Verbose "Chat usage - $($chatResponse.Usage) $($price ? "$price " : $null)for Id $($chatResponse.Id)"
+		return $chatSession
+	}
 
-	return $chatSession
+	#Stream the response
+	$Client.CreateChatCompletionAsStream($ChatSession.Request)
 }
 #endregion Public
 
