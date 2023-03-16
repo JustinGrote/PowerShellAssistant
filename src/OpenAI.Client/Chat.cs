@@ -13,7 +13,7 @@ namespace OpenAI;
 public record ChatConversation
 {
 	public CreateChatCompletionRequest Request { get; set; }
-	public CreateChatCompletionChunkedResponse Response { get; set; }
+	public CreateChatCompletionResponse Response { get; set; }
 
 	public ChatConversation()
 	{
@@ -22,7 +22,7 @@ public record ChatConversation
 	}
 }
 
-public record CreateChatCompletionChunkedResponse
+public class CreateChatCompletionChunkedResponse
 {
 	[JsonPropertyName("id")]
 	[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
@@ -46,37 +46,39 @@ public record CreateChatCompletionChunkedResponse
 	[JsonPropertyName("choices")]
 	[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
 	[System.ComponentModel.DataAnnotations.Required]
-	public ICollection<DeltaChoice> Choices { get; set; } = new Collection<DeltaChoice>();
-
-	[JsonPropertyName("usage")]
-	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-	public Usage2? Usage { get; set; } = default;
+	public ICollection<DeltaChoice> Choices { get; set; }
 }
 
-public record DeltaChoice
+public class DeltaChoice
 {
 	[JsonPropertyName("index")]
 	[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-	public int index;
+	[System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+	public int? Index { get; set; }
+
+	public ChatCompletionResponseMessage? Message { get; set; }
 
 	[JsonPropertyName("finish_reason")]
-	[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-	public string? finish_reason;
+
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+	public string? Finish_reason { get; set; }
 
 	[JsonPropertyName("delta")]
 	[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-	public DeltaContent delta = new();
+	public DeltaContent? Delta { get; set; }
 }
 
-public record DeltaContent
+public class DeltaContent
 {
 	[JsonPropertyName("role")]
-	[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-	public ChatMessageRole? role;
+	[JsonConverter(typeof(JsonStringEnumConverter))]
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public ChatCompletionResponseMessageRole? Role { get; set; }
 
 	[JsonPropertyName("content")]
 	[JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-	public string? content;
+	[System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+	public string? Content { get; set; }
 }
 
 /// <summary>
@@ -156,7 +158,7 @@ public partial class Client
 			CreateChatCompletionChunkedResponse? block;
 			try
 			{
-				// When the response is good, each line is a serializable CompletionCreateRequest
+				// When the response is good, each line is a serializable
 				block = JsonSerializer.Deserialize<CreateChatCompletionChunkedResponse>(line);
 			}
 			catch
@@ -165,6 +167,7 @@ public partial class Client
 				// In this instance, read through the rest of the response, which should be a complete object to parse.
 				line += await reader.ReadToEndAsync(cancellationToken);
 				block = JsonSerializer.Deserialize<CreateChatCompletionChunkedResponse>(line);
+				throw;
 			}
 
 			if (block is not null)

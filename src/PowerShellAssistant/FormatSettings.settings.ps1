@@ -8,4 +8,5 @@
 	'OpenAI.CreateChatCompletionResponse'  = { & (Get-Module PowerShellAssistant) { Format-CreateChatCompletionResponse $args[0] } $PSItem }
 	'OpenAI.Choices2'                      = { & (Get-Module PowerShellAssistant) { Format-Choices2 $args[0] } $PSItem }
 	'OpenAI.ChatConversation'              = { & (Get-Module PowerShellAssistant) { Format-ChatConversation $args[0] } $PSItem }
+	'OpenAI.CreateChatCompletionChunkedResponse' = { & (Get-Module PowerShellAssistant) { Format-CreateChatCompletionChunkedResponse $args[0] } $PSItem }
 }
