@@ -3,6 +3,7 @@ using namespace System.Net.Http
 using namespace System.Net.Http.Headers
 using namespace System.Collections.Generic
 using namespace System.Management.Automation
+using namespace System.Reflection
 
 $ErrorActionPreference = 'Stop'
 #TODO: This should be better
@@ -218,7 +219,7 @@ function Get-AIChat {
 	if ($Stream) {
 		$Client.CreateChatCompletionAsStream($ChatSession.Request)
 		| ForEach-Object {
-			Write-Host -NoNewline $PSItem.Choices[0].Delta.Content
+			$PSItem
 		}
 		Write-Host
 		return
@@ -400,9 +401,8 @@ function Get-Chat {
 
 		[ValidateSet([AvailableModels])]
 		[string]$Model
-
-		#TODO: Figure out how to autocomplete this
 	)
+
 	begin {
 		$ErrorActionPreference = 'Stop'
 		Assert-Connected
@@ -413,6 +413,7 @@ function Get-Chat {
 			}
 		)
 	}
+
 	process {
 		do {
 			$chatPrompt ??= Read-Host -Prompt 'You'
@@ -425,19 +426,66 @@ function Get-Chat {
 			$chatParams = @{
 				Prompt    = $chatHistory
 				MaxTokens = $MaxTokens
+				Stream    = $true
 			}
 			if ($Model) { $chatParams.Model = $Model }
 
-			$result = Get-AIChat @chatParams
+			[List[CreateChatCompletionChunkedResponse]]$streamedResponse = @()
+			[Text.StringBuilder]$chatStream = ''
 
-			foreach ($message in $result.Choices.Message) {
-				$chatHistory.Add([ChatCompletionRequestMessage]$message)
+			Get-AIChat @chatParams
+			| ForEach-Object {
+				[CreateChatCompletionChunkedResponse]$response = $PSItem
+				$streamedResponse.Add($response)
+
+				[DeltaChoice]$firstChoice = $response.Choices[0]
+				[string]$firstChoiceContent = $firstChoice.Delta.Content
+				[void]$chatStream.Append($firstChoiceContent)
+
+				$markdownCodeFenceRegex = '```(?<lang>\w+)?\s*(?<code>[\s\S]*?)```'
+
+				#Start recording if a code block occurs, and if it does, reformat it and copy it to clipboard
+				#TODO: This could maybe be faster by watching the stream for the starting and trailing backticks
+				if ($chatStream -match $markdownCodeFenceRegex) {
+					$codeblock = $matches[0]
+					$code = $matches.code
+					$lang = $matches.lang
+					$codeBlockLineCount = ($codeBlock -split '\r?\n').Count
+
+					#Use ANSI Codes Move the cursor up to the start of the code block to overwrite it
+					Write-Host -NoNewline "`e[${codeBlockLineCount}F"
+					Write-Host -NoNewline "`e[0J"
+
+					$formattedCodeBlock = [Environment]::NewLine +
+					$PSStyle.Reverse +
+					$code +
+					$PSStyle.Reset +
+					[Environment]::NewLine
+
+					Write-Host -ForegroundColor DarkGray -NoNewline $formattedCodeBlock
+
+					#Update the stringbuilder
+					#TODO: Add the start index which generally should not be necessary but probably smart
+					[void]$chatStream.Replace($codeBlock, $formattedCodeBlock)
+				} else {
+					Write-Host -ForegroundColor DarkGray -NoNewline $firstChoice.Delta.Content
+				}
+
+				if ($firstChoice.Finish_reason -eq 'length') {
+					Write-Host -ForegroundColor $PSStyle.Formatting.Warning '[END]'
+					Write-Warning "Response truncated due to length. Consider setting -MaxTokens greater than $MaxTokens"
+				}
 			}
 
-			Write-Output $result.Response
+			$message = [ChatCompletionRequestMessage]::new(
+				[string]::Concat($streamedResponse.Choices.Delta.Content),
+				[ChatCompletionRequestMessageRole]::Assistant
+			)
+
+			$chatHistory.Add($message)
 
 			if (-not $NoClipboard) {
-				$result.Response.Choices[0].Message.Content
+				$message.Content
 				| Convert-ChatCodeToClipboard
 				| Out-Null
 			}
@@ -522,18 +570,20 @@ filter Format-ChatMessage {
 		'User' { 'DarkCyan' }
 		default { 'DarkGray' }
 	}
-	$formattedMessage = $content.Trim() | Format-ChatCode
-	if (-not $Stream) {
-		return "$($PSStyle.Foreground.$roleColor)$role`:$($PSStyle.Reset) $($PSStyle.ForeGround.BrightBlack)$formattedMessage"
+
+	if ($Stream) {
+		if ($role) {
+			return "$($PSStyle.Foreground.$roleColor)$role`:$($PSStyle.Reset) "
+		} elseif ($content) {
+			return "$($PSStyle.Foreground.BrightBlack)$content$($PSStyle.Reset)"
+		} else {
+			#Blank entry, we might want to throw here just in case tho it is technically allowed.
+			return
+		}
 	}
 
-	if ($role) {
-		[console]::Write('a')
-		# [Console]::Write("$($PSStyle.Foreground.$roleColor)$role`:$($PSStyle.Reset) ")
-	} elseif ($content) {
-		[console]::Write('b')
-		# [Console]::Write("$($PSStyle.ForeGround.BrightBlack)$content$($PSStyle.Reset)")
-	}
+	$formattedMessage = $content.Trim() | Format-ChatCode
+	return "$($PSStyle.Foreground.$roleColor)$role`:$($PSStyle.Reset) $($PSStyle.ForeGround.BrightBlack)$formattedMessage"
 }
 
 function Format-CreateChatCompletionChunkedResponse {
@@ -544,6 +594,7 @@ function Format-CreateChatCompletionChunkedResponse {
 }
 
 function Format-Choices2 {
+	[AssemblyMetadata('Format-Custom', 'Choices2')]
 	param(
 		[Choices2]$choice
 	)
@@ -552,62 +603,64 @@ function Format-Choices2 {
 	(Format-ChatMessage $choice.Message)
 }
 
-filter Format-CreateChatCompletionRequest {
-	param(
-		[Parameter(ValueFromPipeline)][CreateChatCompletionRequest]$request
-	)
-	$request.messages | Format-ChatMessage
-}
-filter Format-CreateChatCompletionResponse {
-	param(
-		[Parameter(ValueFromPipeline)][CreateChatCompletionResponse]$response
-	)
-	if ($response.Choices.Count -eq 1) {
-		Format-ChatMessage $response.Choices[0].Message
-	} else {
-		$Response.Choices
+
+	filter Format-CreateChatCompletionRequest {
+		[AssemblyMetadata('Format-Custom', 'OpenAI.CreateChatCompletionRequest')]
+		param(
+			[Parameter(ValueFromPipeline)][CreateChatCompletionRequest]$request
+		)
+		$request.messages | Format-ChatMessage
 	}
-}
-
-function Format-ChatConversation {
-	param(
-		[ChatConversation]$conversation
-	)
-	$messages = @()
-
-	$messages += $conversation.Request | Format-CreateChatCompletionRequest
-	$messages += $conversation.Response | Format-CreateChatCompletionResponse
-	return $messages -join ($PSStyle.Reset + [Environment]::NewLine)
-}
-
-function Get-UsagePrice {
-	param(
-		[string]$Model,
-		[int]$Total
-	)
-
-	#Taken from: https://openai.com/pricing
-	$pricePerToken = @{
-		'code'          = 0
-		'gpt-3.5-turbo' = .002 / 1000
-		'ada'           = .0004 / 1000
-		'babbage'       = .0005 / 1000
-		'curie'         = .002 / 1000
-		'davinci'       = .002 / 1000
-	}
-
-	foreach ($priceItem in $pricePerToken.GetEnumerator()) {
-		if ($Model.Contains($priceItem.key)) {
-			#Will return the first match
-			$totalPrice = $total * $priceItem.Value
-
-			#Formats as currency ($3.2629) and strips trailing zeroes
-			return $totalPrice.ToString('C15').TrimEnd('0')
+	filter Format-CreateChatCompletionResponse {
+		[AssemblyMetadata('Format-Custom', 'OpenAI.CreateChatCompletionResponse')]
+		param(
+			[Parameter(ValueFromPipeline)][CreateChatCompletionResponse]$response
+		)
+		if ($response.Choices.Count -eq 1) {
+			Format-ChatMessage $response.Choices[0].Message
+		} else {
+			$Response.Choices
 		}
 	}
 
-	#Return an empty string if no pricing engine found.
-	return [string]::Empty
+	function Format-ChatConversation {
+		param(
+			[ChatConversation]$conversation
+		)
+		$messages = @()
 
-}
+		$messages += $conversation.Request | Format-CreateChatCompletionRequest
+		$messages += $conversation.Response | Format-CreateChatCompletionResponse
+		return $messages -join ($PSStyle.Reset + [Environment]::NewLine)
+	}
 
+	function Get-UsagePrice {
+		param(
+			[string]$Model,
+			[int]$Total
+		)
+
+		#Taken from: https://openai.com/pricing
+		$pricePerToken = @{
+			'code'          = 0
+			'gpt-3.5-turbo' = .002 / 1000
+			'ada'           = .0004 / 1000
+			'babbage'       = .0005 / 1000
+			'curie'         = .002 / 1000
+			'davinci'       = .002 / 1000
+		}
+
+		foreach ($priceItem in $pricePerToken.GetEnumerator()) {
+			if ($Model.Contains($priceItem.key)) {
+				#Will return the first match
+				$totalPrice = $total * $priceItem.Value
+
+				#Formats as currency ($3.2629) and strips trailing zeroes
+				return $totalPrice.ToString('C15').TrimEnd('0')
+			}
+		}
+
+		#Return an empty string if no pricing engine found.
+		return [string]::Empty
+
+	}
