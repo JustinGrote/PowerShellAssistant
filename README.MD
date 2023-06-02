@@ -1,3 +1,5 @@
+# DEPRECATION NOTICE: I am no longer developing this tool, I recommend you use PowerShellAI or Github Copilot Chat in Visual Studio Code as it meets all the use cases I was going to have for this.
+
 # PowerShell Assistant
 
 This module provides support for the OpenAI API and tools to leverage it including a chat client and PSReadline completer.
